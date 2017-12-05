@@ -328,6 +328,9 @@ module lock_tab ()
     square ([tab_length, tab_width]);
     translate ([-tab_length/2, tab_width/2])
     circle (r = tab_width / 2, h = mat_th, $fn = 20);
+    translate([0, tab_width / 2])
+    polygon([[0,0], [-tab_length/2 - tab_width /2, 0], [0,tab_length * 2], [0,0]]);
+
 }
 
 module head_base ()

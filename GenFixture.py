@@ -84,7 +84,7 @@ class GenFixture:
                                                                                  self.min_y)
 
     def SetOptional(self, rev=None, washer_th=None, nut_f2f=None, nut_c2c=None, nut_th=None,
-                    pivot_d=None, border=None, render=False):
+                    pivot_d=None, border=None, render=False, logosize=(50,50)):
         self.rev = rev
         self.washer_th = washer_th
         self.nut_f2f = nut_f2f
@@ -93,6 +93,7 @@ class GenFixture:
         self.pivot_d = pivot_d
         self.border = border
         self.render = render
+        self.logosize = logosize
 
     def SetParams(self, pcb_th, screw_len, screw_d):
         if pcb_th is not None:
@@ -193,6 +194,8 @@ class GenFixture:
         args += " -D\'pcb_outline=\"%s\"\'" % (path + "/" + self.prj_name + "-outline.dxf")
         args += " -D\'screw_thr_len=%.02f\'" % self.screw_len
         args += " -D\'screw_d=%.02f\'" % self.screw_d
+        args += " -D\'logo_w=%s\'" % self.logosize[0]
+        args += " -D\'logo_h=%s\'" % self.logosize[1]
 
         # Set optional args
         if self.rev != None:
@@ -339,6 +342,8 @@ if __name__ == '__main__':
     parser.add_argument ('--pivot_d', help='Pivot diameter (mm)')
     parser.add_argument ('--border', help='Board (ledge) under pcb (mm)')
     parser.add_argument ('--render', help='Generate a 3d render of the final fixture', action='store_true')
+    parser.add_argument ('--logo-w', help='Set logo width, mm', default=50)
+    parser.add_argument ('--logo-h', help='Set logo height, mm', default=50)
 
     # Get args
     args = parser.parse_args ()
@@ -382,7 +387,8 @@ if __name__ == '__main__':
                          nut_th=args.nut_th,
                          pivot_d=args.pivot_d,
                          border=args.border,
-                         render=args.render)
+                         render=args.render, 
+                         logosize=(args.logo_w, args.logo_h))
 
     # Generate fixture
     fixture.Generate (out_dir)

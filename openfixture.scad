@@ -31,7 +31,7 @@ tp_min_y = 13.7;
 
 // DXF outline of pcb
 pcb_outline = "./rfid_fob-outline.dxf";
-logo = "./osh_logo.dxf";
+logo = "./logo.dxf";
 
 // PCB revision
 rev = "rev.0";
@@ -40,6 +40,9 @@ rev = "rev.0";
 pcb_x = 27.14;
 pcb_y = 45;
 pcb_support_border = 2;
+
+logo_w = 50;
+logo_h = 50;
 
 // Work area of PCB
 // Must be >= PCB size
@@ -121,7 +124,7 @@ washer_th = 0;
 pogo_r = 1.5 / 2;
 
 // Uncompressed length from receptacle
-pogo_uncompressed_length = 8;
+pogo_uncompressed_length = 16;
 pogo_compression = 1;
 
 // Locking tab parameters
@@ -381,8 +384,7 @@ module head_base ()
 }
 
 module logo () {
-    scale ([0.15, 0.15])
-    translate ([-72, -66])
+    translate ([-logo_w / 2, -logo_h / 2])
     import (logo);
 }
 

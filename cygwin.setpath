@@ -1,0 +1,8 @@
+# Use this to set your path in cygwin by sourcing it like this:
+# . cygwin.setpath
+#
+# This puts KiCAD's python at that top of the path so that pcbnew
+# is found.
+PATH='/cygdrive/c/Program Files/KiCad/bin':$PATH
+PATH='/cygdrive/c/Program Files/OpenSCAD':$PATH
+

@@ -24,22 +24,19 @@ NUT_TH=3.85
 NUT_F2F=5.45
 NUT_C2C=6.10
 
-NHAS_MAGICK=$(which magick >/dev/null ; echo $?)
-NHAS_INKSCAPE=$(which inkscape >/dev/null ; echo $?)
-NHAS_PSTOEDIT=$(which pstoedit >/dev/null ; echo $?)
-NHAS_POTRACE=$(which potrace >/dev/null ; echo $?)
-
- [ 1 == 1 -a 1 == 1 ] && echo 1
-
+NHAS_MAGICK=$(which magick >&/dev/null ; echo $?)
+NHAS_INKSCAPE=$(which inkscape >&/dev/null ; echo $?)
+NHAS_PSTOEDIT=$(which pstoedit >&/dev/null ; echo $?)
+NHAS_POTRACE=$(which potrace >&/dev/null ; echo $?)
 HAS_LOGO_SIZE=0
 
 # convert logo
 if [ $NHAS_MAGICK == 0 -a $NHAS_POTRACE ] ; then
     # Tentative conversion, not tested yet:
-    rm logo.dxf
+    rm logo.dxf >& /dev/null
     magick logo.svg logo.dxf
 elif [ $NHAS_INKSCAPE == 0 && $NHAS_PSTOEDIT == 0 ] ; then
-    rm logo.dxf
+    rm logo.dxf >& /dev/null
     inkscape logo.svg -E logo.eps
     pstoedit -dt -f "dxf:-polyaslines -mm" logo.eps logo.dxf
     rm logo.eps

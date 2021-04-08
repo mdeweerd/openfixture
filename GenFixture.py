@@ -268,7 +268,7 @@ class GenFixture:
         # Create test part
         modeOpt=self.genStrDefine("mode","%s","testcut")
         cmdTestcut=("openscad %s "+modeOpt+" -o %s openfixture.scad") % (args, PATHQUOTE + testout + PATHQUOTE)
-        print(cmdTestcut)
+        #print(cmdTestcut)
         os.system(cmdTestcut)
 
         # Create rendering
@@ -276,16 +276,16 @@ class GenFixture:
             modeOpt=self.genStrDefine("mode","%s","3dmodel")
             #cmdRender="openscad %s "+modeOpt+" --render -o %s openfixture.scad" % (args, pngout)
             cmdRender=("openscad %s "+modeOpt+" --render --imgsize=800,800 -o %s openfixture.scad") % (args,CMDLINEQUOTE+pngout+CMDLINEQUOTE)
-            print(cmdRender)
+            #print(cmdRender)
             os.system(cmdRender)
         # Create laser cuttable fixture
         modeOpt=self.genStrDefine("mode","%s","lasercut")
         cmdLasercut=("openscad %s "+modeOpt+" -o %s openfixture.scad") % (args, PATHQUOTE+dxfout+PATHQUOTE)
-        print(cmdLasercut)
+        #print(cmdLasercut)
         os.system(cmdLasercut)
 
         # Print output
-        print("Fixture generated: %s" % dxfout)
+        print("Fixture generated: '%s'" % dxfout)
 
     def GetTestPointStr(self):
         tps = "["

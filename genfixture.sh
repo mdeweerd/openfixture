@@ -38,8 +38,8 @@ LOGO_WIDTH=127
 LOGO_HEIGHT=127
 
 # convert logo
-if [ -r $LOGO_SVG ] ; then
-  LOGO_DXF=${LOGO_SVG%%.*}.dxf
+LOGO_DXF=${LOGO_SVG%%.*}.dxf
+if [ -r $LOGO_SVG -a $LOGO_SVG -nt $LOGO_DXF ] ; then
   if [ $NHAS_MAGICK == 0 -a $NHAS_POTRACE ] ; then
     # Tentative conversion, not fully tested yet:
     rm $LOGO_DXF >& /dev/null

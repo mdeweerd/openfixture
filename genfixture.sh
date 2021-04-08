@@ -1,9 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Wrapper around python wrapper to generate fixture with my geometry
 # Only argument is .kicad_board file
 #
 
+# Can set KICAD_PYTHON in environment to change path.
+KICAD_PYTHON=${KICAD_PYTHON:=python}
 BOARD=$1
 OUTPUT="fixture-can-filter-v2.2"
 
@@ -29,39 +31,43 @@ NHAS_INKSCAPE=$(which inkscape >&/dev/null ; echo $?)
 NHAS_PSTOEDIT=$(which pstoedit >&/dev/null ; echo $?)
 NHAS_POTRACE=$(which potrace >&/dev/null ; echo $?)
 HAS_LOGO_SIZE=0
+LOGO_SVG=logo.svg
+
+# Defaults
+LOGO_WIDTH=127
+LOGO_HEIGHT=127
 
 # convert logo
-if [ $NHAS_MAGICK == 0 -a $NHAS_POTRACE ] ; then
-    # Tentative conversion, not tested yet:
+if [ -r $LOGO_SVG ] ; then
+  LOGO_DXF=${LOGO_SVG%%.*}.dxf
+  if [ $NHAS_MAGICK == 0 -a $NHAS_POTRACE ] ; then
+    # Tentative conversion, not fully tested yet:
+    rm $LOGO_DXF >& /dev/null
+    magick $LOGO_SVG $LOGO_DXF
+    LOGO_OPT="--logo "${LOGO_DXF}
+  elif [ $NHAS_INKSCAPE == 0 && $NHAS_PSTOEDIT == 0 ] ; then
     rm logo.dxf >& /dev/null
-    magick logo.svg logo.dxf
-elif [ $NHAS_INKSCAPE == 0 && $NHAS_PSTOEDIT == 0 ] ; then
-    rm logo.dxf >& /dev/null
-    inkscape logo.svg -E logo.eps
-    pstoedit -dt -f "dxf:-polyaslines -mm" logo.eps logo.dxf
+    inkscape $LOGO_SVG -E logo.eps
+    pstoedit -dt -f "dxf:-polyaslines -mm" logo.eps $LOGO_DXF
     rm logo.eps
-fi
+    LOGO_OPT="--logo "${LOGO_DXF}
+  fi
 
 
 
-if [ $NHAS_MAGICK == 0 ] ; then
-   LOGO_HEIGHT=$(magick identify -format "%h" logo.svg)
-   LOGO_WIDTH=$(magick identify -format "%h" logo.svg)
-   HAS_LOGO_SIZE=1
-elif [ $NHAS_INKSCAPE == 0 ] ; then
-   LOGO_WIDTH=$(echo "scale = 4; $(inkscape logo.svg -W 2>/dev/null) / 90.0 * 25.4" | bc)
-   LOGO_HEIGHT=$(echo "scale = 4; $(inkscape logo.svg -H 2>/dev/null) / 90.0 * 25.4" | bc)
-   HAS_LOGO_SIZE=1
-else
-   # Defaults
-   LOGO_WIDTH=127
-   LOGO_HEIGHT=127
+  if [ $NHAS_MAGICK == 0 ] ; then
+    LOGO_HEIGHT=$(magick identify -format "%h" ${LOGO_SVG})
+    LOGO_WIDTH=$(magick identify -format "%h" ${LOGO_SVG})
+    HAS_LOGO_SIZE=1
+  elif [ $NHAS_INKSCAPE == 0 ] ; then
+    LOGO_WIDTH=$(echo "scale = 4; $(inkscape ${LOGO_SVG} -W 2>/dev/null) / 90.0 * 25.4" | bc)
+    LOGO_HEIGHT=$(echo "scale = 4; $(inkscape ${LOGO_SVG} -H 2>/dev/null) / 90.0 * 25.4" | bc)
+    HAS_LOGO_SIZE=1
+  fi
 fi
 
 echo $LOGO_WIDTH x $LOGO_HEIGHT
 
 
-
-
 # Call python wrapper - KiCAD's Python is just 'python'.
-python GenFixture.py --render --board $BOARD --layer $LAYER --rev $REV --mat_th $MAT --pcb_th $PCB --out $OUTPUT --screw_len $SCREW_LEN --screw_d $SCREW_D --washer_th $WASHER_TH --nut_th $NUT_TH --nut_f2f $NUT_F2F --nut_c2c $NUT_C2C --border $BORDER
+${KICAD_PYTHON} GenFixture.py --flayer $LAYER $LOGO_OPT --render --board $BOARD --layer $LAYER --rev $REV --mat_th $MAT --pcb_th $PCB --out $OUTPUT --screw_len $SCREW_LEN --screw_d $SCREW_D --washer_th $WASHER_TH --nut_th $NUT_TH --nut_f2f $NUT_F2F --nut_c2c $NUT_C2C --border $BORDER

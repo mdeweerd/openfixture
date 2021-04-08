@@ -79,6 +79,7 @@ class GenFixture:
     pivot_d = None
     border = None
     render = False
+    logo = None
 
     # Board dimensions
     min_y = float("inf")
@@ -114,7 +115,7 @@ class GenFixture:
         return (" -D"+key+"="+CMDLINEQUOTE+SCADVARQUOTE+fmt+SCADVARQUOTE+CMDLINEQUOTE) % value.replace('\\','\\\\')
 
     def SetOptional(self, rev=None, washer_th=None, nut_f2f=None, nut_c2c=None, nut_th=None,
-                    pivot_d=None, border=None, render=False, logosize=(50,50)):
+                    pivot_d=None, border=None, render=False, logo=None, logosize=(50,50)):
         self.rev = rev
         self.washer_th = washer_th
         self.nut_f2f = nut_f2f
@@ -123,6 +124,7 @@ class GenFixture:
         self.pivot_d = pivot_d
         self.border = border
         self.render = render
+        self.logo = logo
         self.logosize = logosize
 
     def SetParams(self, pcb_th, screw_len, screw_d):
@@ -240,6 +242,8 @@ class GenFixture:
         # Set optional args
         if self.rev != None:
             args += self.genStrDefine("rev","%s",self.rev)
+        if self.logo != None:
+            args += self.genStrDefine("logo","%s",self.logo)
         if self.washer_th != None:
             args += self.genNumDefine("washer_th","%.02f",float(self.washer_th))
         if self.nut_f2f != None:
@@ -420,7 +424,7 @@ if __name__ == '__main__':
     parser.add_argument('--layer', help='F.Cu | B.Cu')
     parser.add_argument('--flayer', help='Eco1.User | Eco2.User')
     parser.add_argument('--ilayer', help='Eco1.User | Eco2.User')
-    parser.add_argument('--rev', help='Override revisiosn')
+    parser.add_argument('--rev', help='Override revision')
     parser.add_argument('--washer_th', help='Washer thickness for hinge')
     parser.add_argument('--nut_f2f', help='hex nut flat to flat (mm)')
     parser.add_argument('--nut_c2c', help='hex nut corner to corner (mm)')
@@ -428,9 +432,9 @@ if __name__ == '__main__':
     parser.add_argument('--pivot_d', help='Pivot diameter (mm)')
     parser.add_argument('--border', help='Board (ledge) under pcb (mm)')
     parser.add_argument('--render', help='Generate a 3d render of the final fixture', action='store_true')
-    # Note: logo like has disappeared through one of the merges
-    parser.add_argument ('--logo-w', help='Set logo width, mm', default=50)
-    parser.add_argument ('--logo-h', help='Set logo height, mm', default=50)
+    parser.add_argument('--logo', help='Override logo')
+    parser.add_argument('--logo-w', help='Set logo width, mm', default=50)
+    parser.add_argument('--logo-h', help='Set logo height, mm', default=50)
 
     # Get args
     args = parser.parse_args()
@@ -475,6 +479,7 @@ if __name__ == '__main__':
                         pivot_d=args.pivot_d,
                         border=args.border,
                         render=args.render, 
+                        logo=args.logo, 
                         logosize=(args.logo_w, args.logo_h)
     )
 

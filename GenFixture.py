@@ -111,7 +111,7 @@ class GenFixture:
 
     # Generate openscad CLI option for string define
     def genStrDefine(self,key,fmt,value):
-        return (" -D"+key+"="+CMDLINEQUOTE+SCADVARQUOTE+fmt+SCADVARQUOTE+CMDLINEQUOTE) % value
+        return (" -D"+key+"="+CMDLINEQUOTE+SCADVARQUOTE+fmt+SCADVARQUOTE+CMDLINEQUOTE) % value.replace('\\','\\\\')
 
     def SetOptional(self, rev=None, washer_th=None, nut_f2f=None, nut_c2c=None, nut_th=None,
                     pivot_d=None, border=None, render=False, logosize=(50,50)):

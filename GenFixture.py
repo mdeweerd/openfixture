@@ -20,6 +20,7 @@
 import os
 import sys
 import argparse
+from sys import platform as _platform
 from pcbnew import *
 
 # Defaults
@@ -27,7 +28,24 @@ DEFAULT_PCB_TH = 1.6
 DEFAULT_SCREW_D = 3.0
 DEFAULT_SCREW_LEN = 14
 
+if os.name == 'nt':
+  PATHSEP = "\\"
+  CMDLINEQUOTE = "\""
+  SCADVARQUOTE = "\"\""
+else:
+  PATHSEP = "/"
+  CMDLINEQUOTE = "'"
+  SCADVARQUOTE = "\""
 
+PATHQUOTE = "\""
+
+#if _platform == "cygwin":
+#elif _platform == "nt":
+#else:
+
+print("OS:"+os.name+" Platform: "+_platform+" PATHSEP: "+PATHSEP+"\r\n")
+
+  
 # Generate fixture class
 class GenFixture:
     # Layers
@@ -82,6 +100,18 @@ class GenFixture:
                                                                                  self.dims[0],
                                                                                  self.dims[1],
                                                                                  self.min_y)
+
+    # Generate openscad CLI option for numeric define
+    def genNumDefine(self,key,fmt,value):
+        return (" -D"+key+"="+fmt) % value
+
+    # Generate openscad CLI option for expression define
+    def genExpDefine(self,key,fmt,value):
+        return (" -D"+key+"="+CMDLINEQUOTE+fmt+CMDLINEQUOTE) % value
+
+    # Generate openscad CLI option for string define
+    def genStrDefine(self,key,fmt,value):
+        return (" -D"+key+"="+CMDLINEQUOTE+SCADVARQUOTE+fmt+SCADVARQUOTE+CMDLINEQUOTE) % value
 
     def SetOptional(self, rev=None, washer_th=None, nut_f2f=None, nut_c2c=None, nut_th=None,
                     pivot_d=None, border=None, render=False, logosize=(50,50)):
@@ -169,6 +199,7 @@ class GenFixture:
         # Restore origin
         self.brd.SetAuxOrigin(aux_origin_save)
 
+
     def Generate(self, path):
 
         # Get origin and board dimensions
@@ -194,57 +225,64 @@ class GenFixture:
                 self.rev = "rev.0"
 
         # Call openscad to generate fixture
-        args = "-D\'test_points=%s\'" % self.GetTestPointStr()
-        args += " -D\'tp_min_y=%.02f\'" % self.min_y
-        args += " -D\'mat_th=%.02f\'" % self.mat_th
-        args += " -D\'pcb_th=%.02f\'" % self.pcb_th
-        args += " -D\'pcb_x=%.02f\'" % self.dims[0]
-        args += " -D\'pcb_y=%.02f\'" % self.dims[1]
-        args += " -D\'pcb_outline=\"%s\"\'" % (path + "/" + self.prj_name + "-outline.dxf")
-        args += " -D\'screw_thr_len=%.02f\'" % self.screw_len
-        args += " -D\'screw_d=%.02f\'" % self.screw_d
-        args += " -D\'logo_w=%s\'" % self.logosize[0]
-        args += " -D\'logo_h=%s\'" % self.logosize[1]
+        args =  self.genExpDefine("testpoints","%s",self.GetTestPointStr())
+        args += self.genNumDefine("tp_min_y","%.02f",self.min_y)
+        args += self.genNumDefine("mat_th","%.02f",self.mat_th)
+        args += self.genNumDefine("pcb_th","%.02f",self.pcb_th)
+        args += self.genNumDefine("pcb_x","%.02f",self.dims[0])
+        args += self.genNumDefine("pcb_y","%.02f",self.dims[1])
+        args += self.genStrDefine("pcb_outline","%s",(path + PATHSEP + self.prj_name + "-outline.dxf" ))
+        args += self.genNumDefine("screw_thr_len","%.02f",self.screw_len)
+        args += self.genNumDefine("screw_d","%.02f",self.screw_d)
+        args += self.genNumDefine("logo_w","%s",self.logosize[0])
+        args += self.genNumDefine("logo_h","%s",self.logosize[1])
 
         # Set optional args
         if self.rev != None:
-            args += " -D\'rev=\"%s\"\'" % self.rev
+            args += self.genStrDefine("rev","%s",self.rev)
         if self.washer_th != None:
-            args += " -D\'washer_th=%.02f\'" % float(self.washer_th)
+            args += self.genNumDefine("washer_th","%.02f",float(self.washer_th))
         if self.nut_f2f != None:
-            args += " -D\'nut_od_f2f=%.02f\'" % float(self.nut_f2f)
+            args += self.genNumDefine("nut_od_f2f","%.02f",float(self.nut_f2f))
         if self.nut_c2c != None:
-            args += " -D\'nut_od_c2c=%.02f\'" % float(self.nut_c2c)
+            args += self.genNumDefine("nut_od_c2c","%.02f",float(self.nut_c2c))
         if self.nut_th != None:
-            args += " -D\'nut_th=%.02f\'" % float(self.nut_th)
+            args += self.genNumDefine("nut_th","%.02f",float(self.nut_th))
         if self.pivot_d != None:
-            args += " -D\'pivot_d=%.02f\'" % float(self.pivot_d)
+            args += self.genNumDefine("pivot_d","%.02f",float(self.pivot_d))
 
         # Note: on merge, not sure which parameter is needed, adding both:
         if self.border != None:
-            args += " -D\'pcb_support_border=%.02f\'" % float (self.border)
+            args += self.genNumDefine("pcb_support_border","%.02f",float (self.border))
         if self.border != None:
-            args += " -D\'border=%.02f\'" % float(self.border)
+            args += self.genNumDefine("border","%.02f",float(self.border))
 
         # Create output file name
-        dxfout = path + "/" + self.prj_name + "-fixture.dxf"
-        pngout = path + "/" + self.prj_name + "-fixture.png"
-        testout = path + "/" + self.prj_name + "-test.dxf"
+        dxfout = path + PATHSEP + self.prj_name + "-fixture.dxf"
+        pngout = path + PATHSEP + self.prj_name + "-fixture.png"
+        testout = path + PATHSEP + self.prj_name + "-test.dxf"
 
         # This will take a while, print something
         print("Generating Fixture...")
 
         # Create test part
-        # print("openscad {} -D\'mode=\"testcut\"\' -o {} openfixture.scad".format(args, testout))
-        os.system("openscad %s -D\'mode=\"testcut\"\' -o %s openfixture.scad" % (args, testout))
+        modeOpt=self.genStrDefine("mode","%s","testcut")
+        cmdTestcut=("openscad %s "+modeOpt+" -o %s openfixture.scad") % (args, PATHQUOTE + testout + PATHQUOTE)
+        print(cmdTestcut)
+        os.system(cmdTestcut)
 
         # Create rendering
         if self.render:
-            os.system ("openscad %s -D\'mode=\"3dmodel\"\' --render --imgsize=800,800 -o %s openfixture.scad" % (args, pngout))
-            #os.system ("openscad %s -D\'mode=\"3dmodel\"\' --render -o %s openfixture.scad" % (args, pngout))
+            modeOpt=self.genStrDefine("mode","%s","3dmodel")
+            #cmdRender="openscad %s "+modeOpt+" --render -o %s openfixture.scad" % (args, pngout)
+            cmdRender=("openscad %s "+modeOpt+" --render --imgsize=800,800 -o %s openfixture.scad") % (args,CMDLINEQUOTE+pngout+CMDLINEQUOTE)
+            print(cmdRender)
+            os.system(cmdRender)
         # Create laser cuttable fixture
-        #print("openscad {} -D\'mode=\"lasercut\"\' -o {} openfixture.scad".format(args,dxfout))
-        os.system("openscad %s -D\'mode=\"lasercut\"\' -o %s openfixture.scad" % (args, dxfout))
+        modeOpt=self.genStrDefine("mode","%s","lasercut")
+        cmdLasercut=("openscad %s "+modeOpt+" -o %s openfixture.scad") % (args, PATHQUOTE+dxfout+PATHQUOTE)
+        print(cmdLasercut)
+        os.system(cmdLasercut)
 
         # Print output
         print("Fixture generated: %s" % dxfout)

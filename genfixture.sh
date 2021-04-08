@@ -6,8 +6,8 @@
 
 # Can set KICAD_PYTHON in environment to change path.
 KICAD_PYTHON=${KICAD_PYTHON:=python}
-BOARD=$1
-OUTPUT="fixture-can-filter-v2.2"
+BOARD="$1"
+OUTPUT=${BOARD%.*}
 
 # PCB thickness
 PCB=1.6
@@ -34,19 +34,19 @@ HAS_LOGO_SIZE=0
 LOGO_SVG=logo.svg
 
 # Defaults
-LOGO_WIDTH=127
-LOGO_HEIGHT=127
+LOGO_WIDTH=1.7
+LOGO_HEIGHT=1.7
 
 # convert logo
-LOGO_DXF=${LOGO_SVG%%.*}.dxf
+LOGO_DXF=${LOGO_SVG%.*}.dxf
 if [ -r $LOGO_SVG -a $LOGO_SVG -nt $LOGO_DXF ] ; then
   if [ $NHAS_MAGICK == 0 -a $NHAS_POTRACE ] ; then
     # Tentative conversion, not fully tested yet:
-    rm $LOGO_DXF >& /dev/null
-    magick $LOGO_SVG $LOGO_DXF
-    LOGO_OPT="--logo "${LOGO_DXF}
+    rm "$LOGO_DXF" >& /dev/null
+    magick "$LOGO_SVG" "$LOGO_DXF"
+    LOGO_OPT="--logo '${LOGO_DXF}'"
   elif [ $NHAS_INKSCAPE == 0 && $NHAS_PSTOEDIT == 0 ] ; then
-    rm logo.dxf >& /dev/null
+    rm "$LOGO_DXF" >& /dev/null
     inkscape $LOGO_SVG -E logo.eps
     pstoedit -dt -f "dxf:-polyaslines -mm" logo.eps $LOGO_DXF
     rm logo.eps

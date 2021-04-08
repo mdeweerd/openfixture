@@ -15,7 +15,7 @@
  *  Tiny Labs
  *  2016
  */
-use <glaser-stencil-d.ttf>
+use <glaser-stencil-d.ttf>;
 FONTNAME = "Glaser Stencil D";
 
 //
@@ -30,9 +30,10 @@ test_points = [[23.22,25.85],[19.72,22.28],[3.95,25.77],[7.52,22.27],[13.60,13.7
 tp_min_y = 13.7;
 
 // DXF outline of pcb
-//pcb_outline = "./rfid_fob-outline.dxf";
-pcb_outline = "./digiWorker-outline.dxf";
+pcb_outline = "./rfid_fob-outline.dxf";
 osh_logo = "./osh_logo.dxf";
+
+logo = "";
 
 // PCB revision
 rev = "rev.0";
@@ -68,7 +69,9 @@ pcb_th = 1.6;  // Standard PCB size
 tp_correction_offset_x = 0.0;
 tp_correction_offset_y = 0.0;
 
-// Uncomment for laser cuttable dxf
+// Default mode (for debug)
+mode="3dmodel";
+render=1;
 
 if (mode == "lasercut")  lasercut ();
 if (mode == "3dmodel") 3d_model ();
@@ -188,50 +191,50 @@ module tnut_female (n, length = screw_thr_len)
     screw_len_pad = 1;
     
     // Screw hole
-    translate ([0, -screw_r - pad/2])
-    square ([length + screw_len_pad, screw_d + pad]);
+    translate ([0, -screw_r - pad/2, 0])
+      cube ([length + screw_len_pad, screw_d + pad, mat_th]);
     
     // Make space for nut
     translate ([mat_th * n + tnut_grip, -nut_od_f2f/2])
-    square ([nut_th, nut_od_f2f]);
+      cube ([nut_th, nut_od_f2f, mat_th]);
 }
 
 module tnut_hole ()
 {
     pad = 0.1;
-    circle (r = screw_r + pad, $fn = 20);
+    cylinder (r = screw_r + pad, h = mat_th, $fn = 20);
 }
 
 module tng_n (length, cnt)
 {
     tng_y = (length / cnt);
     
-    translate ([0, -length / 2])
-    union () {
+    translate ([0, -length / 2, 0])
+      union () {
         for (i = [0 : 2 : cnt - 1]) {
-            translate ([0, i * tng_y])
-            square ([mat_th, tng_y]);
+            translate ([0, i * tng_y, 0])
+              cube ([mat_th, tng_y, mat_th]);
         }
-    }
+      };
 }
 
 module tng_p (length, cnt)
 {
     tng_y = length / cnt;
     
-    translate ([0, -length / 2])
-    union () {
+    translate ([0, -length / 2, 0])
+      union () {
         for (i = [1 : 2 : cnt - 1]) {
-            translate ([0, i * tng_y])
-            square ([mat_th, tng_y]);
+            translate ([0, i * tng_y, 0])
+              cube ([mat_th, tng_y, mat_th]);
         }
-    }
+      };
 }
 
 module nut_hole ()
 {
     pad = 0.05;
-    circle (r = nut_od_c2c/2 + pad, $fn = 6);
+    cylinder (r = nut_od_c2c/2 + pad, h = mat_th, $fn = 6);
 }
 
 module testcut ()
@@ -241,30 +244,30 @@ module testcut ()
     
     difference () {
         union () {
-            square ([3 * mat_th, y]);
+            cube ([3 * mat_th, y, mat_th]);
         
-            translate ([off, 0])
-            square ([screw_thr_len + 2 * mat_th, y - 2 * mat_th]);
+            translate ([off, 0, 0])
+              square ([screw_thr_len + 2 * mat_th, y - 2 * mat_th, mat_th]);
         }
         // Remove tng slot
-        translate ([mat_th, y/2])
-        tng_n (y - 2 * mat_th, 3);
+        translate ([mat_th, y/2, 0])
+          tng_n (y - 2 * mat_th, 3);
         
         // Remove tnut hole
-        translate ([mat_th * 3/2, y/2])
-        tnut_hole ();
+        translate ([mat_th * 3/2, y/2, 0])
+          tnut_hole ();
         
         // Remove tng from male side
-        translate ([off, y/2 - mat_th])
-        tng_p (y - 2 * mat_th, 3); 
+        translate ([off, y/2 - mat_th, 0])
+          tng_p (y - 2 * mat_th, 3); 
         
         // Remove tnut
-        translate ([off, y/2 - mat_th])
-        tnut_female (1);
+        translate ([off, y/2 - mat_th, 0])
+          tnut_female (1);
         
         // Remove nut hole
-        translate ([off + nut_od_c2c / 2 + screw_thr_len - mat_th, nut_od_f2f / 2 + 2])
-        nut_hole ();
+        translate ([off + nut_od_c2c / 2 + screw_thr_len - mat_th, nut_od_f2f / 2 + 2, 0])
+          nut_hole ();
     }
 }
 
@@ -278,30 +281,30 @@ module head_side ()
         union () {
             hull () {
                 translate ([0, y])
-                square ([x, 0.01]);
+                  cube ([x, 0.01, mat_th]);
                 
                 // Add pivot point
                 translate ([r, y + pivot_support_r])
-                circle (r = pivot_support_r, $fn = 20);
-            }
-            square ([x, y]);
+                  cylinder (r = pivot_support_r, h = mat_th, $fn = 20);
+            };
+            cube ([x, y, mat_th]);
         }
             
         // Remove pivot
-        translate ([r, y + r])
-        circle (r = pivot_r, $fn = 20);
+        translate ([r, y + r, 0])
+          cylinder (r = pivot_r, h = mat_th, $fn = 20);
         
         // Remove slots
         translate ([0, y / 2])
-        tng_n (y, 3);
+          tng_n (y, 3);
         translate ([x - mat_th, y / 2])
-        tng_n (y, 3);
+          tng_n (y, 3);
         
         // Remove lincoln log slots
         translate ([0, mat_th])
-        square ([x / 2, mat_th]);
+          cube ([x / 2, mat_th, mat_th]);
         translate ([0, y - 3 * mat_th])
-        square ([x / 2, mat_th]);
+          cube ([x / 2, mat_th, mat_th]);
     }
 }
 
@@ -311,33 +314,33 @@ module head_front_back ()
     y = head_z;
     
     difference () {
-        square ([x, y]);
+        cube ([x, y, mat_th]);
         
         // Remove grooves
-        translate ([x / 2, 0])
-        rotate ([0, 0, 90])
-        tng_n (x, 3);
-        translate ([x / 2, y - mat_th])
-        rotate ([0, 0, 90])
-        tng_n (x, 3);
+        translate ([x / 2, 0, 0])
+          rotate ([0, 0, 90])
+            tng_n (x, 3);
+        translate ([x / 2, y - mat_th, 0])
+          rotate ([0, 0, 90])
+            tng_n (x, 3);
         
         // Remove assembly slots
-        translate ([mat_th, y / 2])
-        square ([mat_th, y / 2]);
-        translate ([x - 2 * mat_th, y / 2])
-        square ([mat_th, y / 2]);
+        translate ([mat_th, y / 2, 0])
+          cube ([mat_th, y / 2, mat_th]);
+        translate ([x - 2 * mat_th, y / 2, 0])
+          cube ([mat_th, y / 2, mat_th]);
     }
 }
 
 module lock_tab ()
 {
-    translate ([-tab_length/2, 0])
-    square ([tab_length, tab_width]);
-    translate ([-tab_length/2, tab_width/2])
-    circle (r = tab_width / 2, h = mat_th, $fn = 20);
-    translate([0, tab_width / 2])
-    polygon([[0,0], [-tab_length/2 - tab_width /2, 0], [0,tab_length * 2], [0,0]]);
-
+    translate ([-tab_length/2, 0, 0])
+      cube ([tab_length, tab_width, mat_th]);
+    translate ([-tab_length/2, tab_width/2, 0])
+      cylinder (r = tab_width / 2, h = mat_th, $fn = 20);
+    translate([0, tab_width / 2, 0])
+      linear_extrude (height = mat_th)
+        polygon([[0,0], [-tab_length/2 - tab_width /2, 0], [0,tab_length * 2], [0,0]]);
 }
 
 module head_base ()
@@ -351,45 +354,54 @@ module head_base ()
             head_base_common ();
 
             // Add lock tabs
-            translate ([0, head_y / 12 - tab_width / 2])
-            lock_tab ();
-            translate ([head_x, head_y / 12 - tab_width / 2])
-            mirror ([1, 0])
-            lock_tab ();
+            translate ([0, head_y / 12 - tab_width / 2, 0])
+              lock_tab ();
+            translate ([head_x, head_y / 12 - tab_width / 2, 0])
+              mirror ([1, 0])
+                lock_tab ();
         }
 
         // Remove back cutout
-        translate ([2 * mat_th, head_y - mat_th])
-        square ([head_x - 4 * mat_th, mat_th]);
+        translate ([2 * mat_th, head_y - mat_th, 0])
+          cube ([head_x - 4 * mat_th, mat_th, mat_th]);
 
         // Remove holes for hex nuts
-        translate ([nut_offset, nut_offset])
-        tnut_hole ();
-        translate ([head_x - nut_offset, nut_offset])
-        tnut_hole ();
+        translate ([nut_offset, nut_offset,0])
+          tnut_hole ();
+        translate ([head_x - nut_offset, nut_offset, 0])
+          tnut_hole ();
         // Offset these +1 mat_th to allow cutout for swivel
-        translate ([nut_offset, head_y - nut_offset - mat_th])
-        tnut_hole ();
-        translate ([head_x - nut_offset, head_y - nut_offset - mat_th])
-        tnut_hole ();
+        translate ([nut_offset, head_y - nut_offset - mat_th, 0])
+          tnut_hole ();
+        translate ([head_x - nut_offset, head_y - nut_offset - mat_th, 0])
+          tnut_hole ();
         
         // Take 1/3 mouse bit out of front of tabs
-        translate ([-2 * mat_th - washer_th, head_y / 12 - tab_width / 2])
-        square ([mat_th, tab_width / 3]);
-        translate ([head_x + mat_th + washer_th, head_y / 12 - tab_width / 2])
-        square ([mat_th, tab_width / 3]);
+        translate ([-2 * mat_th - washer_th, head_y / 12 - tab_width / 2, 0])
+          cube ([mat_th, tab_width / 3, mat_th]);
+        translate ([head_x + mat_th + washer_th, head_y / 12 - tab_width / 2, 0])
+          cube ([mat_th, tab_width / 3, mat_th]);
 
         // Add revision backwards and upside down
-        translate ([head_x / 2, head_y - 25])
-        rotate ([0, 0, 180])
-        mirror ([1, 0, 0])
-        text (rev, font = FONTNAME, halign = "center", valign = "center", size = 6);
+        translate ([head_x / 2, head_y - 25, 0])
+          linear_extrude (height = mat_th)
+            rotate ([0, 0, 180])
+              mirror ([1, 0, 0])
+                text (rev, font = FONTNAME, halign = "center", valign = "center", size = 6);
     }
 }
 
+module osh_logo () {
+    linear_extrude (height = mat_th)
+      scale ([0.15, 0.15, 1])
+        translate ([-72, -66, 0])
+          import (osh_logo);
+}
+
 module logo () {
-    translate ([-logo_w / 2, -logo_h / 2])
-    import (logo);
+  linear_extrude (height = mat_th )
+    translate ([-logo_w / 2, -logo_h / 2, 0])
+      import (logo);
 }
 
 module head_top ()
@@ -404,27 +416,32 @@ module head_top ()
 
         // Remove back cutout
         translate ([2 * mat_th, head_y - mat_th, 0])
-        cube ([head_x - 4 * mat_th, mat_th, mat_th]);
+          cube ([head_x - 4 * mat_th, mat_th, mat_th]);
         
         // Remove holes for hex nuts
-        translate ([hole_offset, hole_offset])
-        circle (r = screw_r + pad);
-        translate ([hole_offset, head_y - hole_offset - mat_th])
-        circle (r = screw_r + pad);
-        translate ([head_x - hole_offset, head_y - hole_offset - mat_th])
-        circle (r = screw_r + pad);
-        translate ([head_x - hole_offset, hole_offset])
-        circle (r = screw_r + pad);
+        translate ([hole_offset, hole_offset, 0])
+          cylinder (r = screw_r + pad, h = mat_th);
+        translate ([hole_offset, head_y - hole_offset - mat_th, 0])
+          cylinder (r = screw_r + pad, h = mat_th);
+        translate ([head_x - hole_offset, head_y - hole_offset - mat_th, 0])
+          cylinder (r = screw_r + pad, h = mat_th);
+        translate ([head_x - hole_offset, hole_offset, 0])
+          cylinder (r = screw_r + pad, h = mat_th);
 
         // Add osh logo
-        translate ([head_x / 2, head_y - 30])
-        logo ();
+        translate ([head_x / 2, head_y - 30, 0])
+          osh_logo ();
+        
+        // Add other logo
+        if (logo != "") 
+          translate ([head_x / 2, head_y - 60, 0])
+            logo ();
         
         // Remove cable relief holes
         translate ([mat_th * 3 + screw_d, head_y - (5 * mat_th) - screw_r, 0])
-        tnut_hole ();
+          tnut_hole ();
         translate ([head_x - (mat_th * 3 + screw_d), head_y - (5 * mat_th) - screw_r, 0])
-        tnut_hole ();
+          tnut_hole ();
     }
 }
 
@@ -434,15 +451,15 @@ module cable_retention ()
     difference () {
         
         hull () {
-            circle (r=screw_d);
-            translate ([x, 0])
-            circle (r=screw_d);            
+            cylinder (r=screw_d, h=mat_th);
+            translate ([x, 0, 0])
+              cylinder (r=screw_d, h=mat_th);            
         }
         
         // Remove holes
         tnut_hole ();
-        translate ([x, 0])
-        tnut_hole ();
+        translate ([x, 0, 0])
+          tnut_hole ();
     }
 }
 
@@ -451,19 +468,19 @@ module head_base_common ()
     difference () {
         
         // Base square
-        square ([head_x, head_y]);
+        cube ([head_x, head_y, mat_th]);
                 
         // Remove slots
-        translate ([mat_th, head_y / 2])
-        tng_p (head_y, 3);
-        translate ([head_x - 2 * mat_th, head_y / 2])
-        tng_p (head_y, 3);
-        translate ([head_x / 2, head_y - 3 * mat_th])
-        rotate ([0, 0, 90])
-        tng_p (head_x + mat_th, 3);
+        translate ([mat_th, head_y / 2, 0])
+          tng_p (head_y, 3);
+        translate ([head_x - 2 * mat_th, head_y / 2, 0])
+          tng_p (head_y, 3);
+        translate ([head_x / 2, head_y - 3 * mat_th, 0])
+          rotate ([0, 0, 90])
+            tng_p (head_x + mat_th, 3);
         translate ([head_x / 2, mat_th])        
-        rotate ([0, 0, 90])
-        tng_p (head_x + mat_th, 3);
+          rotate ([0, 0, 90])
+            tng_p (head_x + mat_th, 3);
         
         // Calc (x,y) origin = (0, 0)
         origin_x = active_x_offset;
@@ -474,7 +491,7 @@ module head_base_common ()
         
             // Drop pins for test points
             translate ([origin_x + test_points[i][0], origin_y - test_points[i][1], 0])
-            cylinder (r = pogo_r, h = mat_th, $fn=100);
+              cylinder (r = pogo_r, h = mat_th, $fn=100);
         }
     }
 }
@@ -484,20 +501,20 @@ module latch_support ()
     y = latch_support_y;
     
     difference () {
-        square ([x, y]);
+        cube ([x, y, mat_th]);
         
         // Remove tng
-        translate ([0, y / 2])
-        tng_p (y, 3);
-        translate ([x - mat_th, y / 2])
-        tng_p (y, 3);
+        translate ([0, y / 2, 0])
+          tng_p (y, 3);
+        translate ([x - mat_th, y / 2, 0])
+          tng_p (y, 3);
         
         // Remove tnut captures
-        translate ([0, y/2])
-        tnut_female (1);
-        translate ([x, y/2])
-        rotate ([0, 0, 180])
-        tnut_female (1);
+        translate ([0, y/2, 0])
+          tnut_female (1);
+        translate ([x, y/2, 0])
+          rotate ([0, 0, 180])
+            tnut_female (1);
     }
 }
 
@@ -508,29 +525,29 @@ module latch ()
     difference () {
   
         hull () {
-            circle (r = tab_width / 2, $fn = 20);
+            cylinder (r = tab_width / 2, h=mat_th, $fn = 20);
             translate ([0, y + screw_d])
-            circle (r = tab_width / 2, $fn = 20);
+              cylinder (r = tab_width / 2, h=mat_th, $fn = 20);
 
             // Cross support
             translate ([-screw_d - support_x, 0])
-            square ([support_x, y]);
+              cube ([support_x, y, mat_th]);
         }
         
        // Remove screw hole
-       circle (r = screw_r, $fn = 20);
+       cylinder (r = screw_r, h = mat_th, $fn = 20);
        
        // Remove slot
        translate ([-screw_r, y, 0])
-       square ([(3 * tab_width) / 4, mat_th + pad]);
+         cube ([(3 * tab_width) / 4, mat_th + pad, mat_th]);
        
        // Remove tng
-       translate ([-support_x - nut_pad, y / 2])
-       tng_n (y - 2 * mat_th, 3);
+       translate ([-support_x - nut_pad, y / 2, 0])
+         tng_n (y - 2 * mat_th, 3);
        
        // Remove support hole
-       translate ([-support_x + mat_th / 2 - nut_pad, y / 2])
-       tnut_hole ();
+       translate ([-support_x + mat_th / 2 - nut_pad, y / 2, 0])
+         tnut_hole ();
     }
 }
 module base_side ()
@@ -540,54 +557,54 @@ module base_side ()
     
     difference () {
         union () {
-            square ([x, y]);
+            cube ([x, y, mat_th]);
             
             // Add pivot structure
             hull () {
-                translate ([x + base_pivot_offset, y - pivot_support_d / 2])
-                circle (r = pivot_support_d / 2, $fn = 20);
-                translate ([0, y - pivot_support_d])
-                square ([1, pivot_support_d]);
-            }
+                translate ([x + base_pivot_offset, y - pivot_support_d / 2, 0])
+                  cylinder (r = pivot_support_d / 2, h = mat_th, $fn = 20);
+                translate ([0, y - pivot_support_d, 0])
+                  cube ([1, pivot_support_d, mat_th]);
+            };
         }
         
         // Remove pivot hole
-        translate ([x + base_pivot_offset, y - pivot_support_d / 2])
-        circle (r = pivot_r, $fn = 20);
+        translate ([x + base_pivot_offset, y - pivot_support_d / 2, 0])
+          cylinder (r = pivot_r, h = mat_th, $fn = 20);
 
         // Remove carrier slots
-        translate ([x - mat_th, head_y / 2])
-        tng_p (head_y, 7);
-        translate ([x - 2 * mat_th, head_y / 2])
-        tng_p (head_y, 7);
+        translate ([x - mat_th, head_y / 2, 0])
+          tng_p (head_y, 7);
+        translate ([x - 2 * mat_th, head_y / 2, 0])
+          tng_p (head_y, 7);
         
         // Remove tnut slot
-        translate ([x, head_y / 2])
-        rotate ([0, 0, 180])
-        tnut_female (2);
+        translate ([x, head_y / 2, 0])
+          rotate ([0, 0, 180])
+            tnut_female (2);
         
         // Offset from bottom
         support_offset = 2 * mat_th;
         
         // Cross bar support
-        translate ([support_offset, head_y / 6])
-        mirror ([0, 1 ,0])
-        tng_n (head_y / 3, 2);
-        translate ([support_offset + mat_th / 2, mat_th * 3])
-        tnut_hole ();
+        translate ([support_offset, head_y / 6, 0])
+          mirror ([0, 1 ,0])
+            tng_n (head_y / 3, 2);
+        translate ([support_offset + mat_th / 2, head_y / 12, 0])
+          tnut_hole ();
         
         // Second cross bar support
-        translate ([support_offset, head_y - (head_y / 6 + mat_th)])
-        tng_n (head_y / 3, 3);
-        translate ([support_offset + mat_th / 2, head_y - (head_y / 6 + mat_th)])
-        tnut_hole ();
+        translate ([support_offset, head_y - (head_y / 6 + mat_th), 0])
+          tng_n (head_y / 3, 3);
+        translate ([support_offset + mat_th / 2, head_y - (head_y / 6 + mat_th), 0])
+          tnut_hole ();
         
         // Back support
-        translate ([x / 2 + mat_th, y - pivot_support_d / 2 - (mat_th / 2)])
-        rotate ([0, 0, 90])
-        tng_n (x, 3);
-        translate ([x / 2 + mat_th, y - pivot_support_d / 2])        
-        tnut_hole ();
+        translate ([x / 2 + mat_th, y - pivot_support_d / 2 - (mat_th / 2), 0])
+          rotate ([0, 0, 90])
+            tng_n (x, 3);
+        translate ([x / 2 + mat_th, y - pivot_support_d / 2, 0])        
+          tnut_hole ();
     }
 }
 
@@ -598,22 +615,22 @@ module base_front_support ()
     
     difference () {
         // Base square
-        square ([x, y]);
+        cube ([x, y, mat_th]);
         
         // Remove slots
-        translate ([0, y / 2])
-        mirror ([0, 1, 0])
-        tng_p (y, 2);
-        translate ([x - mat_th, y / 2])
-        mirror ([0, 1, 0])
-        tng_p (y, 2);
+        translate ([0, y / 2, 0])
+          mirror ([0, 1, 0])
+            tng_p (y, 2);
+        translate ([x - mat_th, y / 2, 0])
+          mirror ([0, 1, 0])
+            tng_p (y, 2);
         
         // Remove female tnuts
-        translate ([0, mat_th * 3])
-        tnut_female (1, length = screw_thr_len - mat_th);
-        translate ([x, mat_th * 3])
-        rotate ([0, 0, 180])
-        tnut_female (1, length = screw_thr_len - mat_th);
+        translate ([0, y / 4, 0])
+          tnut_female (1, length = screw_thr_len - mat_th);
+        translate ([x, y / 4, 0])
+          rotate ([0, 0, 180])
+            tnut_female (1, length = screw_thr_len - mat_th);
     }
 }
 
@@ -624,20 +641,20 @@ module base_support (length)
     
     difference () {
         // Base square
-        square ([x, y]);
+        cube ([x, y, mat_th]);
         
         // Remove slots
-        translate ([0, y / 2])
-        tng_p (y, 3);
-        translate ([x - mat_th, y / 2])
-        tng_p (y, 3);
+        translate ([0, y / 2, 0])
+          tng_p (y, 3);
+        translate ([x - mat_th, y / 2, 0])
+          tng_p (y, 3);
         
         // Remove female tnuts
-        translate ([0, y / 2])
-        tnut_female (1);
-        translate ([x, y / 2])
-        rotate ([0, 0, 180])
-        tnut_female (1);
+        translate ([0, y / 2, 0])
+          tnut_female (1);
+        translate ([x, y / 2, 0])
+          rotate ([0, 0, 180])
+            tnut_female (1);
     }
 }
 
@@ -648,26 +665,26 @@ module base_back_support ()
             base_support (base_z);
 
             // Add additional support to receive pivot screw and nut
-            translate ([3 * mat_th, base_z])
-            square ([base_x - 6 * mat_th, base_pivot_offset + mat_th + 1.5]);
+            translate ([3 * mat_th, base_z, 0])
+              cube ([base_x - 6 * mat_th, base_pivot_offset + mat_th + 1.5, mat_th]);
         }
         
         // Remove tnut supports
-        translate ([0, base_z + base_pivot_offset - mat_th])
-        tnut_female (3);
+        translate ([0, base_z + base_pivot_offset - mat_th, 0])
+          tnut_female (3);
 
         // Remove tnut supports
-        translate ([base_x, base_z + base_pivot_offset - mat_th])
-        rotate ([0, 0, 180])
-        tnut_female (3);
+        translate ([base_x, base_z + base_pivot_offset - mat_th, 0])
+          rotate ([0, 0, 180])
+            tnut_female (3);
     }
 }
 
 module spacer ()
 {
     difference () {
-        circle (r = pivot_support_r, $fn = 20);
-        circle (r = pivot_r, $fn = 20);
+        cylinder (r = pivot_support_r, h = mat_th, $fn = 20);
+        cylinder (r = pivot_r, h = mat_th, $fn = 20);
     }
 }
 
@@ -681,7 +698,7 @@ module carrier (dxf_filename, pcb_x, pcb_y, border)
     scale_y = 1 - ((2 * border) / pcb_y);
 
     difference () {
-        square ([x, y]);
+        cube ([x, y, mat_th]);
         
         // Get scale_offset
         sx_offset = (pcb_x - (pcb_x * scale_x)) / 2;
@@ -691,29 +708,30 @@ module carrier (dxf_filename, pcb_x, pcb_y, border)
         // Import dxf, extrude and translate
         translate ([mat_th + active_x_offset + tp_correction_offset_x, 
                    work_area_y + active_y_offset + tp_correction_offset_y, 0])
-        translate ([sx_offset, -sy_offset, 0])
-               
-       
-        linear_extrude (height = mat_th)
-        scale ([scale_x, scale_y, 1])
-        import (dxf_filename);
+          translate ([sx_offset, -sy_offset, 0])
+            hull() {
+              linear_extrude (height = mat_th)
+                scale ([scale_x, scale_y, 1])
+                  import (dxf_filename);
+            }
         
         
         // Remove slots
-        translate ([0, y/2])
-        tng_n (y, 7);
+        translate ([0, y/2, 0])
+          tng_n (y, 7);
         translate ([x - mat_th, y/2])
-        tng_n (y, 7);
+          tng_n (y, 7);
         
         // Remove holes
-        translate ([mat_th / 2, y / 2])
-        tnut_hole ();
-        translate ([x - mat_th / 2, y / 2])
-        tnut_hole ();
+        translate ([mat_th / 2, y / 2, 0])
+          tnut_hole ();
+        translate ([x - mat_th / 2, y / 2, 0])
+          tnut_hole ();
         
         // Add revision ID, also allows to determine which side is top
-        translate ([x / 2, y - 25])
-        text (rev, font = FONTNAME, halign = "center", valign = "center", size = 6);
+        translate ([x / 2, y - 25, 0])
+          linear_extrude (height = mat_th)
+            text (rev, font = FONTNAME, halign = "center", valign = "center", size = 6);
     }
 }
 
@@ -724,98 +742,80 @@ module 3d_head ()
 {
     head_top_offset = head_z - mat_th;
     
-    linear_extrude(height = mat_th)
     head_base ();
     translate ([2 * mat_th, 0, 0])
-    rotate ([0, -90, 0])
-    linear_extrude(height = mat_th) 
-    head_side ();
+      rotate ([0, -90, 0])
+        head_side ();
     translate ([head_x - mat_th, 0, 0])
-    rotate ([0, -90, 0])
-    linear_extrude(height = mat_th) 
-    head_side ();
+      rotate ([0, -90, 0])
+        head_side ();
     translate ([0, 0, head_top_offset])
-    linear_extrude(height = mat_th) 
-    head_top ();
+      head_top ();
     translate ([0, head_y - 2 * mat_th, 0])
-    rotate ([90, 0, 0])
-    linear_extrude(height = mat_th) 
+      rotate ([90, 0, 0]);
     head_front_back ();
     translate ([0, 2 * mat_th, 0])
-    rotate ([90, 0, 0])
-    linear_extrude(height = mat_th) 
-    head_front_back ();
+      rotate ([90, 0, 0])
+        head_front_back ();
     translate ([mat_th * 3 + screw_d, head_y - (5 * mat_th) - screw_r, head_top_offset + mat_th + 1])
-    linear_extrude(height = mat_th) 
-    cable_retention ();
+      cable_retention ();
 }
 
 module 3d_base () {
     // Base sides
     rotate ([0, -90, 0])
-    linear_extrude(height = mat_th) 
-    base_side ();
+        base_side ();
     translate ([head_x + mat_th, 0, 0])
-    rotate ([0, -90, 0])
-    linear_extrude(height = mat_th) 
-    base_side ();
+      rotate ([0, -90, 0])
+        base_side ();
     
     // Supports
     translate ([-mat_th, 0, 2 * mat_th])
-    linear_extrude(height = mat_th) 
-    base_front_support ();
+      base_front_support ();
     translate ([-mat_th, head_y - (head_y / 3) - mat_th, 2 * mat_th])
-    linear_extrude(height = mat_th) 
-    base_support (head_y / 3);
+      base_support (head_y / 3);
     translate ([-mat_th, base_y - pivot_support_r + mat_th/2, mat_th])
-    rotate ([90, 0, 0])
-    linear_extrude(height = mat_th) 
-    base_back_support ();
+      rotate ([90, 0, 0])
+        base_back_support ();
     
     // Add spacers
     translate ([0, base_y - pivot_support_r, base_z + base_pivot_offset])
-    rotate ([0, 90, 0])
-    linear_extrude(height = mat_th) 
-    spacer ();
+      rotate ([0, 90, 0])
+        spacer ();
     translate ([base_x - 3 * mat_th, base_y - pivot_support_r, base_z + base_pivot_offset])
-    rotate ([0, 90, 0])
-    linear_extrude(height = mat_th) 
-    spacer ();
+      rotate ([0, 90, 0])
+        spacer ();
     
     // Add carrier blank and carrier
     translate ([-mat_th, 0, base_z - (2 * mat_th)])
-    linear_extrude(height = mat_th) 
-    carrier (pcb_outline, pcb_x, pcb_y, pcb_support_border);
+      carrier (pcb_outline, pcb_x, pcb_y, pcb_support_border);
     translate ([-mat_th, 0, base_z - mat_th])
-    linear_extrude(height = mat_th) 
-    carrier (pcb_outline, pcb_x, pcb_y, 0);
+      carrier (pcb_outline, pcb_x, pcb_y, 0);
 }
 
 module 3d_latch () {
     // Add latches
     translate ([-mat_th * 2 - washer_th, 0, 0])
-    rotate ([0, 90, 0])
-    linear_extrude(height = mat_th) 
-    latch ();
+      rotate ([0, 90, 0])
+        latch ();
     translate ([base_x - mat_th + washer_th, 0, 0])
-    rotate ([0, 90, 0])
-    linear_extrude(height = mat_th) 
-    latch ();
+      rotate ([0, 90, 0])
+        latch ();
     translate ([-2 * mat_th - washer_th, latch_z_offset / 4, support_x - mat_th + nut_pad])
-    linear_extrude(height = mat_th) 
-    latch_support ();    
+      latch_support ();    
 }
 
 module 3d_model () {
+
     translate ([0, 0, base_z + base_pivot_offset - pivot_support_r])
-    translate ([0, head_y + pivot_support_r, pivot_support_r])
-    rotate ([-8, 0, 0])
-    translate ([0, -head_y - pivot_support_r, -pivot_support_r])
-    3d_head ();
+      translate ([0, head_y + pivot_support_r, pivot_support_r])
+        rotate ([-8, 0, 0])
+          translate ([0, -head_y - pivot_support_r, -pivot_support_r])
+           3d_head ();
     3d_base ();
     translate ([0, head_y / 12, base_z / 3])
-    rotate([120, 0, 0])
-    3d_latch ();
+      rotate([120, 0, 0])
+        3d_latch ();
 }
 
 module validate_testpoints (dxf_filename)
@@ -828,8 +828,8 @@ module validate_testpoints (dxf_filename)
     
         // Drop pins for test points
         color ([1, 0, 0])
-        translate ([test_points[i][0], -test_points[i][1]])
-        circle (r = pogo_r);
+          translate ([test_points[i][0], -test_points[i][1]])
+            circle (r = pogo_r);
     }
 }
 
@@ -839,84 +839,84 @@ module lasercut ()
     carrier (pcb_outline, pcb_x, pcb_y, pcb_support_border);
     xoffset1 = base_x + laser_pad;
     translate ([xoffset1, 0])
-    carrier (pcb_outline, pcb_x, pcb_y, -0.05);
+      carrier (pcb_outline, pcb_x, pcb_y, -0.05);
     
     // Add head top
     xoffset2 = xoffset1 + base_x + laser_pad;
     translate ([xoffset2, 0])
-    head_top ();
+      head_top ();
 
 
     // Add head base, flip to take advantage of kerf securing nuts
     xoffset3 = xoffset2 + 2 * head_x + tab_length + laser_pad;
     translate ([xoffset3, 0])
-    mirror ([1, 0])
-    head_base ();
+      mirror ([1, 0])
+        head_base ();
 
     
     // Add base sides
     xoffset4 = xoffset3 + tab_length + laser_pad;
     translate ([xoffset4, 0])
-    base_side ();
+      base_side ();
     xoffset5 = xoffset4 + 2 * base_z + base_pivot_offset + pivot_support_r + laser_pad;
     translate ([xoffset5, base_y])
-    rotate ([0, 0, 180])
-    base_side ();
+      rotate ([0, 0, 180])
+        base_side ();
     
     // Add spacer in center
     xoffset6 = xoffset4 + (2 * base_z + base_pivot_offset) / 2 + laser_pad;
     yoffset1 = 2 * pivot_support_d + laser_pad;
     translate ([xoffset6, yoffset1])
-    spacer ();
+      spacer ();
     yoffset2 = yoffset1 + pivot_support_d + laser_pad;
     translate ([xoffset6, yoffset2])
-    spacer ();
+      spacer ();
 
 
     // Add base supports
     xoffset7 = xoffset6 + base_z + base_pivot_offset + laser_pad;
     translate ([xoffset7, 0, 0])
-    base_front_support ();
+      base_front_support ();
     yoffset3 = head_y / 3 + laser_pad;
     translate ([xoffset7, yoffset3])
-    base_support (head_y / 3);
+      base_support (head_y / 3);
     yoffset4 = yoffset3 + head_y / 3 + laser_pad;
     translate ([xoffset7, yoffset4, 0])
-    base_back_support ();
+      base_back_support ();
 
     // Add head sides
     xoffset8 = xoffset7 + base_x + laser_pad;
     translate ([xoffset8, 0])
-    head_side ();
+      head_side ();
     xoffset9 = xoffset8 + head_z + laser_pad;
     translate ([xoffset9, 0])
-    head_side ();
+      head_side ();
     
     // Add front latch support
     xoffset10 = xoffset9 + head_z + laser_pad;
     translate ([xoffset10, 0])
-    latch_support ();
+      latch_support ();
  
     // Add head front/back
     yoffset5 = latch_support_y + laser_pad;
     translate ([xoffset10, yoffset5])
-    head_front_back ();
+      head_front_back ();
     yoffset6 = yoffset5 + head_z + laser_pad;
     translate ([xoffset10, yoffset6])
-    head_front_back ();
+      head_front_back ();
 
     // Add cable retention
     yoffset7 = yoffset6 + head_z + laser_pad + screw_d;
     translate ([xoffset10 + screw_d, yoffset7])
-    cable_retention ();
+      cable_retention ();
 
     // Add latches
     xoffset11 = xoffset10 + screw_d + support_x + laser_pad;
     //yoffset8 = yoffset7 + base_z + screw_d + laser_pad;
     yoffset8 = yoffset7 + screw_d + tab_width / 2 + laser_pad;
     translate ([xoffset11, yoffset8, 0])
-    latch ();
+      latch ();
     xoffset12 = xoffset11 + screw_d + support_x + tab_width / 2 + laser_pad;
     translate ([xoffset12, yoffset8])
-    latch ();
+      latch ();
 }

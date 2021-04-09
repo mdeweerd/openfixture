@@ -309,18 +309,29 @@ class GenFixture:
             # Iterate over all pads
             for p in m.Pads():
 
-                # Check that there is no paste and it's on front copper layer
+                # Check that there is no paste and it's on selected copper layer
                 if (p.IsOnLayer(self.layer) == True):
+
+                    parent=p.GetParent() # Footprint
 
                     # Are we forcing this pad?
                     if (p.IsOnLayer(self.force_layer) == True):
                         pass
 
+                    # On ignore layer?
+                    elif (p.IsOnLayer(self.ignore_layer) == True):
+                        continue
+
+                    # On ignore layer?
+                    elif (parent.GetValue() == "TestProbe"):
+                        pass
+
                     # else check ignore cases
-                    elif ((p.IsOnLayer(self.ignore_layer) == True) or
+                    elif (
                           (p.IsOnLayer(self.paste) == True) or
                           (p.GetAttribute() != PAD_ATTRIB_SMD)):
                         continue
+
 
                     # Print position
                     tp = ToMM(p.GetPosition())
@@ -331,7 +342,10 @@ class GenFixture:
                     else:
                         x = self.dims[0] - (self.Round(tp[0] - self.origin[0]))
                     y = self.Round(tp[1] - self.origin[1])
-                    # print "tp = (%f, %f)" % (x,y)
+                    #print "tp = (%f, %f)" % (x,y)
+                    # Debug - print information about pad.
+                    print("%s: %s\tTP(%0.2f,%0.2f)" % (parent.GetReference(), p.GetNet().GetNetname(), x, y))
+                    #print("PAD:%s %s %s" % (p.GetName(), parent.GetReference(), parent.GetValue()))
 
                     # Check if less than min
                     if y < self.min_y:

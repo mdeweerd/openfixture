@@ -893,7 +893,6 @@ module lasercut ()
     translate ([xoffset7, yoffset3])
       base_support (head_y / 3);
     yoffset4 = yoffset3 + head_y / 3 + laser_pad;
-	// Next line: yoffset0 or yoffset4?
     translate ([xoffset7, yoffset4])
       base_back_support ();
 

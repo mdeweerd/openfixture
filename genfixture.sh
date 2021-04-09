@@ -69,7 +69,7 @@ fi
 echo $LOGO_WIDTH x $LOGO_HEIGHT
 
 
-RENDER=--render
+#RENDER=--render
 
 # Call python wrapper - KiCAD's Python is just 'python'.
 ${KICAD_PYTHON} GenFixture.py $LOGO_OPT $RENDER --board $BOARD --layer $LAYER --rev $REV --mat_th $MAT --pcb_th $PCB --out $OUTPUT --screw_len $SCREW_LEN --screw_d $SCREW_D --washer_th $WASHER_TH --nut_th $NUT_TH --nut_f2f $NUT_F2F --nut_c2c $NUT_C2C --border $BORDER

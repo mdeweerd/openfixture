@@ -51,8 +51,23 @@ http://tinylabs.io/openfixture
 ## BOM
 http://tinylabs.io/openfixture-bom
 
-## Kicad export
+## KiCAD export
 http://tinylabs.io/openfixture-kicad-export
+
+## STEP export
+A standalone scad file is generated.  
+Copy the logos and font to the directory where the generated scad file is located.
+Or, copy the SCAD file to the script directory.
+You can perform `./convert_shape.py <SCADFILE> out.step` to convert to STEP for instance.
+
+## STL export
+A standalone scad file is generated.  
+Copy the logos and font to the directory where the generated scad file is located.
+Or, copy the SCAD file to the script directory.
+You can perform `openscad --render -o out.stl <SCADFILE>` to convert to STL for instance.
+
+## Testpoint validation
+To verify that all your testpoints are within the PCB area, you can check that no checkpoint appears in the `*-validate.dxf` file.
 
 ## Assembly
 More info including detailed assembly instructions at http://tinylabs.io/openfixture-assembly
@@ -63,12 +78,14 @@ More info including detailed assembly instructions at http://tinylabs.io/openfix
 
 ## Known Issues
   * When loading the fonts file a new small window opens in Ubuntu. Seems innocuous but still annoying [Only seen on ubuntu 14.04]
+  * STEP generation with FreeCAD is not entirely functional
 
 ## License
 Creative Commons (CC BY-SA 4.0)
 
 ## Contributors
   * Elliot Buller - Tiny Labs Inc
+  * Mario DE WEERD - Ynamics
 
 Please email with any pull requests or new feature requests
 elliot@tinylabs.io

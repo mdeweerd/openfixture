@@ -77,6 +77,7 @@ class GenFixture:
     nut_c2c = None
     nut_th = None
     pivot_d = None
+    pcb_h = None
     border = None
     render = False
     logo = None
@@ -115,13 +116,14 @@ class GenFixture:
         return (" -D"+key+"="+CMDLINEQUOTE+SCADVARQUOTE+fmt+SCADVARQUOTE+CMDLINEQUOTE) % value.replace('\\','\\\\')
 
     def SetOptional(self, rev=None, washer_th=None, nut_f2f=None, nut_c2c=None, nut_th=None,
-                    pivot_d=None, border=None, render=False, logo=None, logosize=(50,50)):
+                    pivot_d=None, pcb_h=None, border=None, render=False, logo=None, logosize=(50,50)):
         self.rev = rev
         self.washer_th = washer_th
         self.nut_f2f = nut_f2f
         self.nut_c2c = nut_c2c
         self.nut_th = nut_th
         self.pivot_d = pivot_d
+        self.pcb_h = pcb_h
         self.border = border
         self.render = render
         self.logo = logo
@@ -254,6 +256,8 @@ class GenFixture:
             args += self.genNumDefine("nut_th","%.02f",float(self.nut_th))
         if self.pivot_d != None:
             args += self.genNumDefine("pivot_d","%.02f",float(self.pivot_d))
+        if self.pcb_h != None:
+            args += self.genNumDefine("pcb_max_height_component","%.02f",float(self.pcb_h))
 
         # Note: on merge, not sure which parameter is needed, adding both:
         if self.border != None:
@@ -419,6 +423,7 @@ if __name__ == '__main__':
 
     # Add optional arguments
     parser.add_argument('--pcb_th', help='pcb thickness (mm)')
+    parser.add_argument('--pcb_h', help='pcb component height (mm)')
     parser.add_argument('--screw_len', help='Assembly screw thread length (default = 16mm)')
     parser.add_argument('--screw_d', help='Assembly screw diameter (default=3mm)')
     parser.add_argument('--layer', help='F.Cu | B.Cu')
@@ -476,6 +481,7 @@ if __name__ == '__main__':
                         nut_f2f=args.nut_f2f,
                         nut_c2c=args.nut_c2c,
                         nut_th=args.nut_th,
+                        pcb_h=args.pcb_h,
                         pivot_d=args.pivot_d,
                         border=args.border,
                         render=args.render, 

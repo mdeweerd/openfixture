@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Wrapper around python wrapper to generate fixture with my geometry
+# Wrapper around python wrapper to generate fixture with specific geometry
 # Only argument is .kicad_board file
 #
 
@@ -12,7 +12,7 @@ OUTPUT=$(basename ${BOARD%.*})
 # PCB thickness
 PCB=1.6
 LAYER='B.Cu'
-REV='rev.2.2'
+REV='rev.1.0'
 
 # Nearest opposite side component to border
 BORDER=0.8
@@ -69,5 +69,7 @@ fi
 echo $LOGO_WIDTH x $LOGO_HEIGHT
 
 
+RENDER=--render
+
 # Call python wrapper - KiCAD's Python is just 'python'.
-${KICAD_PYTHON} GenFixture.py --flayer $LAYER $LOGO_OPT --render --board $BOARD --layer $LAYER --rev $REV --mat_th $MAT --pcb_th $PCB --out $OUTPUT --screw_len $SCREW_LEN --screw_d $SCREW_D --washer_th $WASHER_TH --nut_th $NUT_TH --nut_f2f $NUT_F2F --nut_c2c $NUT_C2C --border $BORDER
+${KICAD_PYTHON} GenFixture.py $LOGO_OPT $RENDER --board $BOARD --layer $LAYER --rev $REV --mat_th $MAT --pcb_th $PCB --out $OUTPUT --screw_len $SCREW_LEN --screw_d $SCREW_D --washer_th $WASHER_TH --nut_th $NUT_TH --nut_f2f $NUT_F2F --nut_c2c $NUT_C2C --border $BORDER

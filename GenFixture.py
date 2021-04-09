@@ -92,6 +92,7 @@ class GenFixture:
         self.prj_name = prj_name
         self.brd = brd
         self.mat_th = float(mat_th)
+        self.scad_values = {}
 
     def __exit__(self, type, value, traceback):
         pass
@@ -105,15 +106,19 @@ class GenFixture:
 
     # Generate openscad CLI option for numeric define
     def genNumDefine(self,key,fmt,value):
+        self.scad_values[key] = fmt % value
         return (" -D"+key+"="+fmt) % value
 
     # Generate openscad CLI option for expression define
     def genExpDefine(self,key,fmt,value):
+        self.scad_values[key]= fmt % value
         return (" -D"+key+"="+CMDLINEQUOTE+fmt+CMDLINEQUOTE) % value
 
     # Generate openscad CLI option for string define
     def genStrDefine(self,key,fmt,value):
-        return (" -D"+key+"="+CMDLINEQUOTE+SCADVARQUOTE+fmt+SCADVARQUOTE+CMDLINEQUOTE) % value.replace('\\','\\\\')
+        quotedvalue=value.replace('\\','\\\\')
+        self.scad_values[key]=(('"'+fmt+'"')%quotedvalue)
+        return (" -D"+key+"="+CMDLINEQUOTE+SCADVARQUOTE+fmt+SCADVARQUOTE+CMDLINEQUOTE) % quotedvalue
 
     def SetOptional(self, rev=None, washer_th=None, nut_f2f=None, nut_c2c=None, nut_th=None,
                     pivot_d=None, pcb_h=None, border=None, render=False, logo=None, logosize=(50,50)):
@@ -128,6 +133,7 @@ class GenFixture:
         self.render = render
         self.logo = logo
         self.logosize = logosize
+        self.scad_values = {}
 
     def SetParams(self, pcb_th, screw_len, screw_d):
         if pcb_th is not None:
@@ -270,9 +276,25 @@ class GenFixture:
         pngout = path + PATHSEP + self.prj_name + "-fixture.png"
         testout = path + PATHSEP + self.prj_name + "-test.dxf"
         validateout = path + PATHSEP + self.prj_name + "-validate.dxf"
+        standalonescad = path + PATHSEP + self.prj_name + ".scad"
+        #standalonescad = self.prj_name + ".scad"  # In local directory to propery reference logos
 
         # This will take a while, print something
         print("Generating Fixture...")
+
+        # Create standalone SCAD file (For instance, to convert to step with FreeCAD) 
+        vars="//\n// Parameters from command line\n//\n"
+        modeOpt=self.genStrDefine("mode","%s","3dmodel")
+        for k, v in self.scad_values.items():
+            #print("%s = %s" %(k,v))
+            vars+="%s = %s;\n" %(k,v)
+
+        with open('openfixture.scad', 'r') as f:
+            src = f.read()
+            result = src.replace("// HANDLE_DO_NOT_REMOVE",vars)
+            file = open(standalonescad, 'w')
+            file.write(result)
+            file.close()
 
         # Create test part
         modeOpt=self.genStrDefine("mode","%s","testcut")

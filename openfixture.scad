@@ -22,7 +22,10 @@ FONTNAME = "Glaser Stencil D";
 // PCB input
 //
 // Test points
-test_points = [[23.22,25.85],[19.72,22.28],[3.95,25.77],[7.52,22.27],[13.60,13.70],[13.55,18.70],[13.55,34.90],[13.60,29.90],];
+demo_test_points = [[23.22,25.85],[19.72,22.28],[3.95,25.77],[7.52,22.27],[13.60,13.70],[13.55,18.70],[13.55,34.90],[13.60,29.90],[44.03,101.93],[110,110],[100,100],[60,60]];
+// 68.72, 121.43
+
+test_points = demo_test_points;
 
 // Used below to calculate distance from hinge to nearest point based on min
 // contact angle... Ideally we want it as close to 90 degrees as possible
@@ -139,6 +142,8 @@ tab_length = 4 * mat_th + washer_th;
 
 // Stop tab
 stop_tab_y = 2 * mat_th;
+
+// HANDLE_DO_NOT_REMOVE
 
 //
 // DO NOT EDIT BELOW... unless you feel like it ;-)
@@ -830,14 +835,18 @@ module 3d_model () {
         3d_latch ();
 }
 
+/*
+ * Any testpoints still visible on this output are invalid.
+ */
 module validate_testpoints (dxf_filename)
 {
     hull () {
         import (dxf_filename);
     }
+
     // Loop over test points
     for ( i = [0 : len (test_points) - 1] ) {
-    
+        //echo(i,test_points[i][0],test_points[i][1]);
         // Drop pins for test points
         color ([1, 0, 0])
           translate ([test_points[i][0], -test_points[i][1]])
@@ -845,6 +854,9 @@ module validate_testpoints (dxf_filename)
     }
 }
 
+/*
+ * Create the laser cut template.
+ */
 module lasercut ()
 {
     // Add carrier panels

@@ -76,10 +76,6 @@ tp_correction_offset_y = 0.0;
 mode="3dmodel";
 render=1;
 
-if (mode == "lasercut")  lasercut ();
-if (mode == "3dmodel") 3d_model ();
-if (mode == "validate") validate_testpoints (pcb_outline);
-if (mode == "testcut") testcut ();
 
 
 // Smothness function for circles
@@ -183,6 +179,14 @@ nut_pad = (nut_od_c2c - mat_th) / 2;
 latch_z_offset = (base_z * (2 / 3) + base_pivot_offset - pivot_r) / 2;
 support_x = base_x / 12 + 2 * mat_th;
 latch_support_y = base_z * (2 / 3) + base_pivot_offset - pivot_support_r - 2 * mat_th;
+
+
+
+if (mode == "lasercut")  lasercut ();
+if (mode == "3dmodel") 3d_model ();
+if (mode == "validate") validate_testpoints (pcb_outline);
+if (mode == "testcut") testcut ();
+
 //
 // MODULES
 //

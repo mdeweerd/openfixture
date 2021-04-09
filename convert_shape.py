@@ -11,7 +11,7 @@ import os
 
 FREECADPATH = None
 
-paths = [ '/usr/lib64/freecad/lib', 'C:/Program Files/FreeCAD 0.18/bin' ]
+paths = [ '/usr/lib64/freecad/lib',  'C:/Program Files/FreeCAD 0.19/bin', 'C:/Program Files/FreeCAD 0.18/bin' ]
 for p in paths:
   if(os.path.exists(p)):
     FREECADPATH = p

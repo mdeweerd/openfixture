@@ -7,7 +7,7 @@
 # Can set KICAD_PYTHON in environment to change path.
 KICAD_PYTHON=${KICAD_PYTHON:=python}
 BOARD="$1"
-OUTPUT=${BOARD%.*}
+OUTPUT=$(basename ${BOARD%.*})
 
 # PCB thickness
 PCB=1.6

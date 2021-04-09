@@ -229,7 +229,7 @@ class GenFixture:
                 self.rev = "rev.0"
 
         # Call openscad to generate fixture
-        args =  self.genExpDefine("testpoints","%s",self.GetTestPointStr())
+        args =  self.genExpDefine("test_points","%s",self.GetTestPointStr())
         args += self.genNumDefine("tp_min_y","%.02f",self.min_y)
         args += self.genNumDefine("mat_th","%.02f",self.mat_th)
         args += self.genNumDefine("pcb_th","%.02f",self.pcb_th)
@@ -269,6 +269,7 @@ class GenFixture:
         dxfout = path + PATHSEP + self.prj_name + "-fixture.dxf"
         pngout = path + PATHSEP + self.prj_name + "-fixture.png"
         testout = path + PATHSEP + self.prj_name + "-test.dxf"
+        validateout = path + PATHSEP + self.prj_name + "-validate.dxf"
 
         # This will take a while, print something
         print("Generating Fixture...")
@@ -279,6 +280,18 @@ class GenFixture:
         #print(cmdTestcut)
         os.system(cmdTestcut)
 
+        # Create testpoint validation
+        modeOpt=self.genStrDefine("mode","%s","validate")
+        cmdValidate=("openscad %s "+modeOpt+" -o %s openfixture.scad") % (args, PATHQUOTE + validateout + PATHQUOTE)
+        print(cmdValidate)
+        os.system(cmdValidate)
+
+        # Create laser cuttable fixture (before rendering, because this is faster)
+        modeOpt=self.genStrDefine("mode","%s","lasercut")
+        cmdLasercut=("openscad %s "+modeOpt+" -o %s openfixture.scad") % (args, PATHQUOTE+dxfout+PATHQUOTE)
+        #print(cmdLasercut)
+        os.system(cmdLasercut)
+
         # Create rendering
         if self.render:
             modeOpt=self.genStrDefine("mode","%s","3dmodel")
@@ -286,11 +299,6 @@ class GenFixture:
             cmdRender=("openscad %s "+modeOpt+" --render --imgsize=800,800 -o %s openfixture.scad") % (args,CMDLINEQUOTE+pngout+CMDLINEQUOTE)
             #print(cmdRender)
             os.system(cmdRender)
-        # Create laser cuttable fixture
-        modeOpt=self.genStrDefine("mode","%s","lasercut")
-        cmdLasercut=("openscad %s "+modeOpt+" -o %s openfixture.scad") % (args, PATHQUOTE+dxfout+PATHQUOTE)
-        #print(cmdLasercut)
-        os.system(cmdLasercut)
 
         # Print output
         print("Fixture generated: '%s'" % dxfout)
@@ -345,7 +353,6 @@ class GenFixture:
                     #print "tp = (%f, %f)" % (x,y)
                     # Debug - print information about pad.
                     print("%s: %s\tTP(%0.2f,%0.2f)" % (parent.GetReference(), p.GetNet().GetNetname(), x, y))
-                    #print("PAD:%s %s %s" % (p.GetName(), parent.GetReference(), parent.GetValue()))
 
                     # Check if less than min
                     if y < self.min_y:

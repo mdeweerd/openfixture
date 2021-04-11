@@ -121,7 +121,9 @@ class GenFixture:
         return (" -D"+key+"="+CMDLINEQUOTE+SCADVARQUOTE+fmt+SCADVARQUOTE+CMDLINEQUOTE) % quotedvalue
 
     def SetOptional(self, rev=None, washer_th=None, nut_f2f=None, nut_c2c=None, nut_th=None,
-                    pivot_d=None, pcb_h=None, border=None, render=False, pins=(), logo=None, logosize=(50,50)):
+                    pivot_d=None, pcb_h=None, border=None, render=False,
+                    exclude_size_refs = (),
+                    pins=(), logo=None, logosize=(50,50)):
         self.rev = rev
         self.washer_th = washer_th
         self.nut_f2f = nut_f2f
@@ -132,6 +134,7 @@ class GenFixture:
         self.border = border
         self.render = render
         self.pins = pins
+        self.exclude_size_refs = exclude_size_refs
         self.logo = logo
         self.logosize = logosize
         self.scad_values = {}
@@ -171,7 +174,9 @@ class GenFixture:
         self.brd.SetAuxOrigin(wxPoint(FromMM(self.origin[0]), FromMM(self.origin[1])))
 
         # Get pointers to controllers
+        # https://docs.kicad.org/doxygen-python/classpcbnew_1_1PLOT__CONTROLLER.html
         pctl = PLOT_CONTROLLER(self.brd)
+        # https://docs.kicad.org/doxygen-python/classpcbnew_1_1PCB__PLOT__PARAMS.html
         popt = pctl.GetPlotOptions()
 
         # Setup output directory
@@ -196,6 +201,10 @@ class GenFixture:
 
         # Do the BRD edges in black
         popt.SetColor(COLOR4D(0, 0, 0, 1.0))  # color4d = RED, GREEN, BLUE, OPACITY
+
+        for item in self.brd.GetDrawings():
+            if item.__class__.__name__ == "PCB_TARGET":
+                item.DeleteStructure()
 
         # Open file
         pctl.SetLayer(Edge_Cuts)
@@ -223,7 +232,7 @@ class GenFixture:
         if len(self.test_points) == 0:
             print("WARNING, ABORTING: No test points found!")
             print("Verify that the pcbnew file has test points specified")
-            print("or use the --flayer option to force test points")
+            print("or use the --flayer and/or --pins options to add test points")
             return
 
         # Plot DXF
@@ -399,16 +408,38 @@ class GenFixture:
         max_y = 0
 
         # Get all drawings
-        for line in self.brd.GetDrawings():
+        if 1==1:
+          bb = self.brd.GetBoardEdgesBoundingBox()
+          
+          x = ToMM(bb.GetX())
+          y = ToMM(bb.GetY())
+          #w = ToMM(bb.GetWidth())
+          #h = ToMM(bb.GetHeight())
+          #print("x: {}; y: {}; w: {}; h: {} ".format(x,y,w,h))
 
+          # Debug
+          # print "(%f, %f)" % (x, y)
+
+          # Min x/y will be origin
+          if x < self.origin[0]:
+             self.origin[0] = self.Round(x)
+             #    self.origin[0] = x
+          if y < self.origin[1]:
+             self.origin[1] = self.Round(y)
+             #    self.origin[1] = y
+
+          # Max x.y will be dimensions
+          if x > max_x:
+             max_x = x
+          if y > max_y:
+             max_y = y
+        else: 
+          for line in self.brd.GetDrawings():
+
+            if line.__class__.__name__ == "PCB_TARGET":
+                continue
             # Check that it's in the outline layer
             if line.GetLayerName() == 'Edge.Cuts':
-                p = line.GetParent()
-                try:
-                   print("LineParent: %s\n" % p.GetName())
-                except Exception:
-                   # Nothing
-                   print(".")
                 # Get bounding box
                 bb = line.GetBoundingBox()
 
@@ -436,7 +467,11 @@ class GenFixture:
                     max_y = y
                     
         # Get all modules for bounding boxes
+        print(', '.join(str(p) for p in self.exclude_size_refs))
         for modu in self.brd.GetModules():
+            if modu.GetReference() in self.exclude_size_refs:
+               continue
+               
             #bb = modu.GetBoundingBox()
             bb = modu.GetFootprintRect()
 
@@ -444,11 +479,11 @@ class GenFixture:
             y = ToMM(bb.GetY())
             w = ToMM(bb.GetWidth())
             h = ToMM(bb.GetHeight())
-            #print("x: {}; y: {}; w: {}; h: {} ; ".format(x, y, w, h))
+            # print("{}: x: {}; y: {}; w: {}; h: {} ; ".format(modu.GetReference(), x, y, w, h))
 
             # Min x/y will be origin
             if x < self.origin[0]:
-            #    self.origin[0] = self.Round(x)
+                # self.origin[0] = self.Round(x)
                 self.origin[0] = x
             if y < self.origin[1]:
                 #self.origin[1] = self.Round(y)
@@ -496,6 +531,7 @@ if __name__ == '__main__':
     parser.add_argument('--logo-w', help='Set logo width, mm', default=50)
     parser.add_argument('--logo-h', help='Set logo height, mm', default=50)
     parser.add_argument('--pins', help='Extra pins to include (THT/SMD) REF-PINNBR - comma separated')
+    parser.add_argument('--exclude-size', help='Module refs to exclude from board size - comma separated')
 
     # Get args
     args = parser.parse_args()
@@ -527,6 +563,11 @@ if __name__ == '__main__':
     else:
         pins = []
 
+    if args.exclude_size is not None:
+        exclude_size_refs = args.exclude_size.split(',')
+    else:
+        exclude_size_refs = []
+
     # Create a fixture generator
     fixture = GenFixture(prj_name, brd, args.mat_th)
 
@@ -547,6 +588,7 @@ if __name__ == '__main__':
                         border=args.border,
                         render=args.render, 
 			pins=pins,
+			exclude_size_refs=exclude_size_refs,
                         logo=args.logo, 
                         logosize=(args.logo_w, args.logo_h)
     )

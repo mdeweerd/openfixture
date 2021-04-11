@@ -406,7 +406,13 @@ module osh_logo () {
 
 module logo () {
     translate ([-logo_w / 2, -logo_h / 2])
-      import (logo);
+      if( logo_w > logo_h ) {
+        resize([logo_w,0], auto = true )
+          import (logo);
+      } else {
+        resize([0,logo_h], auto = true )
+          import (logo);
+      }
 }
 
 module head_top ()
@@ -439,7 +445,7 @@ module head_top ()
         
         // Add other logo
         if (logo != "") 
-          translate ([head_x / 2, head_y - 60])
+          translate ([head_x / 2, 30])
             logo ();
         
         // Remove cable relief holes

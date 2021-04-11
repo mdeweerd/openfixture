@@ -72,6 +72,7 @@ class GenFixture:
 
     # Optional arguments
     rev = None
+    pogo_d = None
     washer_th = None
     nut_f2f = None
     nut_c2c = None
@@ -91,6 +92,7 @@ class GenFixture:
     def __init__(self, prj_name, brd, mat_th):
         self.prj_name = prj_name
         self.brd = brd
+        self.CleanBrd()
         self.mat_th = float(mat_th)
         self.scad_values = {}
 
@@ -120,11 +122,12 @@ class GenFixture:
         self.scad_values[key]=(('"'+fmt+'"')%quotedvalue)
         return (" -D"+key+"="+CMDLINEQUOTE+SCADVARQUOTE+fmt+SCADVARQUOTE+CMDLINEQUOTE) % quotedvalue
 
-    def SetOptional(self, rev=None, washer_th=None, nut_f2f=None, nut_c2c=None, nut_th=None,
+    def SetOptional(self, rev=None, pogo_d=None, washer_th=None, nut_f2f=None, nut_c2c=None, nut_th=None,
                     pivot_d=None, pcb_h=None, border=None, render=False,
                     exclude_size_refs = (),
                     pins=(), logo=None, logosize=(50,50)):
         self.rev = rev
+        self.pogo_d = pogo_d
         self.washer_th = washer_th
         self.nut_f2f = nut_f2f
         self.nut_c2c = nut_c2c
@@ -165,6 +168,15 @@ class GenFixture:
     def Round(self, x, base=0.01):
         return round(base * round(x / base), 2)
 
+
+    #
+    # Clean board from items to simplyfy processing
+    #
+    def CleanBrd(self):
+        for item in self.brd.GetDrawings():
+            if item.__class__.__name__ == "PCB_TARGET":
+                item.DeleteStructure()
+
     def PlotDXF(self, path):
 
         # Save auxillary origin
@@ -201,10 +213,6 @@ class GenFixture:
 
         # Do the BRD edges in black
         popt.SetColor(COLOR4D(0, 0, 0, 1.0))  # color4d = RED, GREEN, BLUE, OPACITY
-
-        for item in self.brd.GetDrawings():
-            if item.__class__.__name__ == "PCB_TARGET":
-                item.DeleteStructure()
 
         # Open file
         pctl.SetLayer(Edge_Cuts)
@@ -262,6 +270,8 @@ class GenFixture:
             args += self.genStrDefine("rev","%s",self.rev)
         if self.logo != None:
             args += self.genStrDefine("logo","%s",self.logo)
+        if self.pogo_d != None:
+            args += self.genNumDefine("pogo_r","%.02f",float(self.pogo_d/2))
         if self.washer_th != None:
             args += self.genNumDefine("washer_th","%.02f",float(self.washer_th))
         if self.nut_f2f != None:
@@ -283,6 +293,10 @@ class GenFixture:
 
         # Create output file name
         dxfout = path + PATHSEP + self.prj_name + "-fixture.dxf"
+        dxf2out = path + PATHSEP + self.prj_name + "-v2-fixture.dxf"
+        # For easy visualisation
+        svgout = path + PATHSEP + self.prj_name + "-fixture.svg"
+        svg2out = path + PATHSEP + self.prj_name + "-v2-fixture.svg"
         pngout = path + PATHSEP + self.prj_name + "-fixture.png"
         testout = path + PATHSEP + self.prj_name + "-test.dxf"
         validateout = path + PATHSEP + self.prj_name + "-validate.dxf"
@@ -320,7 +334,13 @@ class GenFixture:
 
         # Create laser cuttable fixture (before rendering, because this is faster)
         modeOpt=self.genStrDefine("mode","%s","lasercut")
-        cmdLasercut=("openscad %s "+modeOpt+" -o %s openfixture.scad") % (args, PATHQUOTE+dxfout+PATHQUOTE)
+        cmdLasercut=("openscad %s "+modeOpt+" -o %s -o %s openfixture.scad ") % (args, PATHQUOTE+dxfout+PATHQUOTE, PATHQUOTE+svgout+PATHQUOTE)
+        #print(cmdLasercut)
+        os.system(cmdLasercut)
+
+        # Create laser v2 cuttable fixture (before rendering, because this is faster)
+        modeOpt=self.genStrDefine("mode","%s","lasercut_v2")
+        cmdLasercut=("openscad %s "+modeOpt+" -o %s -o %s openfixture.scad ") % (args, PATHQUOTE+dxf2out+PATHQUOTE, PATHQUOTE+svg2out+PATHQUOTE)
         #print(cmdLasercut)
         os.system(cmdLasercut)
 
@@ -520,6 +540,7 @@ if __name__ == '__main__':
     parser.add_argument('--flayer', help='Eco1.User | Eco2.User')
     parser.add_argument('--ilayer', help='Eco1.User | Eco2.User')
     parser.add_argument('--rev', help='Override revision')
+    parser.add_argument('--pogo_d', help='Pogo hole diameter (default=1.22mm)')
     parser.add_argument('--washer_th', help='Washer thickness for hinge')
     parser.add_argument('--nut_f2f', help='hex nut flat to flat (mm)')
     parser.add_argument('--nut_c2c', help='hex nut corner to corner (mm)')

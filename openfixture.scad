@@ -183,6 +183,7 @@ latch_support_y = base_z * (2 / 3) + base_pivot_offset - pivot_support_r - 2 * m
 
 
 if (mode == "lasercut")  lasercut ();
+if (mode == "lasercut_v2")  lasercut_v2 ();
 if (mode == "3dmodel") 3d_model ();
 if (mode == "validate") validate_testpoints (pcb_outline);
 if (mode == "testcut") testcut ();
@@ -746,6 +747,7 @@ module carrier (dxf_filename, pcb_x, pcb_y, border)
 //
 // 3D renderings of assembly
 //
+// head_base, head_side (x2), head_top, head_front_back (x2), cable_retention
 module 3d_head ()
 {
     head_top_offset = head_z - mat_th;
@@ -776,6 +778,7 @@ module 3d_head ()
           cable_retention ();
 }
 
+// base_side (x2), base_front_support, base_support, base_back_support, spacer (x2)
 module 3d_base () {
     // Base sides
     rotate ([0, -90, 0])
@@ -814,9 +817,10 @@ module 3d_base () {
         carrier (pcb_outline, pcb_x, pcb_y, pcb_support_border);
     translate ([-mat_th, 0, base_z - mat_th])
       linear_extrude (height = mat_th)
-        carrier (pcb_outline, pcb_x, pcb_y, 0);
+        carrier (pcb_outline, pcb_x, pcb_y, -0.05);
 }
 
+// latch (x2), latch_support
 module 3d_latch () {
     // Add latches
     translate ([-mat_th * 2 - washer_th, 0, 0])
@@ -834,12 +838,22 @@ module 3d_latch () {
 
 module 3d_model () {
 
+    // Add carrier panels
+    carrier (pcb_outline, pcb_x, pcb_y, pcb_support_border);
+    carrier (pcb_outline, pcb_x, pcb_y, -0.05);
+    
+
+    // head_base, head_side (x2), head_top, head_front_back (x2), cable_retention
     translate ([0, 0, base_z + base_pivot_offset - pivot_support_r])
       translate ([0, head_y + pivot_support_r, pivot_support_r])
         rotate ([-8, 0, 0])
           translate ([0, -head_y - pivot_support_r, -pivot_support_r])
            3d_head ();
+
+    // base_side (x2), base_front_support, base_support, base_back_support, spacer (x2)
     3d_base ();
+
+    // latch (x2), latch_support
     translate ([0, head_y / 12, base_z / 3])
       rotate([120, 0, 0])
         3d_latch ();
@@ -954,3 +968,106 @@ module lasercut ()
     translate ([xoffset12, yoffset8])
       latch ();
 }
+
+module lasercut_v2 ()
+{
+    // Add carrier panels
+    carrier (pcb_outline, pcb_x, pcb_y, pcb_support_border);
+    xoffset1A = base_x + laser_pad;
+
+    translate ([xoffset1A, 0])
+      carrier (pcb_outline, pcb_x, pcb_y, -0.05);
+
+    xoffset2A = xoffset1A + base_x + tab_length + laser_pad;
+
+    // Offset past bottom row
+    
+    yoffsetB = head_y + laser_pad;
+
+    // Add head top
+    xoffset0B = 0;
+    translate ([xoffset0B, yoffsetB])
+      head_top ();
+
+    xoffset1B = xoffset0B + 2 * head_x + tab_length + laser_pad;
+
+    // Add head base, flip to take advantage of kerf securing nuts
+    translate ([xoffset1B, yoffsetB])
+      mirror ([1, 0])
+        head_base ();
+
+    xoffset2B = xoffset1B + tab_length + laser_pad;
+    xoffset4 = xoffset2A;
+    if(xoffset4<xoffset2B) {
+       xoffset4 = xoffset2B;
+    } 
+
+    // Add base sides
+    translate ([xoffset4, 0])
+      base_side ();
+    xoffset5 = xoffset4 + 2 * base_z + base_pivot_offset + pivot_support_r + laser_pad;
+    translate ([xoffset5, base_y])
+      rotate ([0, 0, 180])
+        base_side ();
+    
+    // Add spacer in center
+    xoffset6 = xoffset4 + (2 * base_z + base_pivot_offset) / 2 + laser_pad;
+    yoffset1 = 2 * pivot_support_d + laser_pad;
+    translate ([xoffset6, yoffset1])
+      spacer ();
+    yoffset2 = yoffset1 + pivot_support_d + laser_pad;
+    translate ([xoffset6, yoffset2])
+      spacer ();
+    xoffset7 = xoffset6 + base_z + base_pivot_offset + laser_pad;
+
+
+    // Add head sides
+    translate ([xoffset7, 0])
+      head_side ();
+    xoffset8 = xoffset7 + head_z + laser_pad;
+    translate ([xoffset8, 0])
+      head_side ();
+    xoffset9 = xoffset8 + head_z + laser_pad;
+
+    // Add base supports
+    y_base_offset = base_y + laser_pad;
+    x_base_offset = xoffset2B;
+    translate ([x_base_offset, y_base_offset])
+      base_front_support ();
+    yoffset3 = head_y / 3 + laser_pad;
+    translate ([x_base_offset, y_base_offset + yoffset3])
+      base_support (head_y / 3);
+    yoffset4 = yoffset3 + head_y / 3 + laser_pad;
+    translate ([x_base_offset, y_base_offset + yoffset4])
+      base_back_support ();
+    x_base_offset_next = x_base_offset + base_x + laser_pad;
+
+    xoffset10 = x_base_offset_next;
+    // Add front latch support
+    translate ([xoffset10, 0])
+      latch_support ();
+    yoffset5 = latch_support_y + laser_pad;
+
+    // Add head front/back
+    translate ([xoffset10, yoffset5])
+      head_front_back ();
+    yoffset6 = yoffset5 + head_z + laser_pad;
+    translate ([xoffset10, yoffset6])
+      head_front_back ();
+    yoffset7 = yoffset6 + head_z + laser_pad + screw_d;
+
+    // Add cable retention
+    translate ([xoffset10 + screw_d, yoffset7])
+      cable_retention ();
+
+    // Add latches
+    xoffset11 = xoffset10 + screw_d + support_x + laser_pad;
+    //yoffset8 = yoffset7 + base_z + screw_d + laser_pad;
+    yoffset8 = yoffset7 + screw_d + tab_width / 2 + laser_pad;
+    translate ([xoffset11, yoffset8])
+      latch ();
+    xoffset12 = xoffset11 + screw_d + support_x + tab_width / 2 + laser_pad;
+    translate ([xoffset12, yoffset8])
+      latch ();
+}
+

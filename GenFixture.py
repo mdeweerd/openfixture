@@ -121,7 +121,7 @@ class GenFixture:
         return (" -D"+key+"="+CMDLINEQUOTE+SCADVARQUOTE+fmt+SCADVARQUOTE+CMDLINEQUOTE) % quotedvalue
 
     def SetOptional(self, rev=None, washer_th=None, nut_f2f=None, nut_c2c=None, nut_th=None,
-                    pivot_d=None, pcb_h=None, border=None, render=False, logo=None, logosize=(50,50)):
+                    pivot_d=None, pcb_h=None, border=None, render=False, pins=(), logo=None, logosize=(50,50)):
         self.rev = rev
         self.washer_th = washer_th
         self.nut_f2f = nut_f2f
@@ -131,6 +131,7 @@ class GenFixture:
         self.pcb_h = pcb_h
         self.border = border
         self.render = render
+        self.pins = pins
         self.logo = logo
         self.logosize = logosize
         self.scad_values = {}
@@ -344,6 +345,8 @@ class GenFixture:
 
                     parent=p.GetParent() # Footprint
 
+                    print ("%s-%s" % (parent.GetReference(), p.GetName()))
+
                     # Are we forcing this pad?
                     if (p.IsOnLayer(self.force_layer) == True):
                         pass
@@ -352,8 +355,12 @@ class GenFixture:
                     elif (p.IsOnLayer(self.ignore_layer) == True):
                         continue
 
-                    # On ignore layer?
+                    # Is it a TestProbe component
                     elif (parent.GetValue() == "TestProbe"):
+                        pass
+
+                    # Is it in the desired component pin list?
+                    elif  ("%s-%s" % (parent.GetReference(), p.GetName())) in self.pins:
                         pass
 
                     # else check ignore cases
@@ -483,6 +490,7 @@ if __name__ == '__main__':
     parser.add_argument('--logo', help='Override logo')
     parser.add_argument('--logo-w', help='Set logo width, mm', default=50)
     parser.add_argument('--logo-h', help='Set logo height, mm', default=50)
+    parser.add_argument('--pins', help='Extra pins to include (THT/SMD) REF-PINNBR - comma separated')
 
     # Get args
     args = parser.parse_args()
@@ -509,6 +517,11 @@ if __name__ == '__main__':
     if args.pcb_th is None:
         args.pcb_th = "1.6"
 
+    if args.pins is not None:
+        pins = args.pins.split(',')
+    else:
+        pins = []
+
     # Create a fixture generator
     fixture = GenFixture(prj_name, brd, args.mat_th)
 
@@ -528,6 +541,7 @@ if __name__ == '__main__':
                         pivot_d=args.pivot_d,
                         border=args.border,
                         render=args.render, 
+			pins=pins,
                         logo=args.logo, 
                         logosize=(args.logo_w, args.logo_h)
     )

@@ -1,4 +1,4 @@
-#!/usr/bin/env /cygdrive/c/Program Files/FreeCAD 0.18/bin/python
+#!/usr/bin/env /cygdrive/c/Program Files/FreeCAD 0.19/bin/python
 #!/usr/bin/python
 # From https://gist.github.com/slazav/4853bd36669bb9313ddb83f51ee1cb82 - slazav/convert_shape.py
 #

@@ -14,6 +14,7 @@ PCB=1.6
 LAYER='B.Cu'
 REV='rev.1.0'
 
+PINS=${PINS:=J2-1,J2-2,T1-10,T1-6,P1-1,J3-1,J3-2,J1-1,J1-2,J11-1,J11-2,J11-3,J11-4,J11-5,J11-6,J18-1,J18-2,J18-3,J18-4,J18-5,J18-6,J18-7,J18-8,J18-9,J18-10,J18-11,J18-12,J4-1,J4-2,U8-1,U8-2,U8-3,U8-4,U8-5,U8-6,U8-7,U8-8,U10-1,U10-2,U10-3,U10-4,U10-5,U10-6,U10-7,U10-8}
 # Nearest opposite side component to border
 BORDER=0.8
 
@@ -72,4 +73,4 @@ echo $LOGO_WIDTH x $LOGO_HEIGHT
 #RENDER=--render
 
 # Call python wrapper - KiCAD's Python is just 'python'.
-${KICAD_PYTHON} GenFixture.py $LOGO_OPT $RENDER --board $BOARD --layer $LAYER --rev $REV --mat_th $MAT --pcb_th $PCB --out $OUTPUT --screw_len $SCREW_LEN --screw_d $SCREW_D --washer_th $WASHER_TH --nut_th $NUT_TH --nut_f2f $NUT_F2F --nut_c2c $NUT_C2C --border $BORDER
+${KICAD_PYTHON} GenFixture.py $LOGO_OPT $RENDER --board $BOARD --layer $LAYER --pins=${PINS} --rev $REV --mat_th $MAT --pcb_th $PCB --out $OUTPUT --screw_len $SCREW_LEN --screw_d $SCREW_D --washer_th $WASHER_TH --nut_th $NUT_TH --nut_f2f $NUT_F2F --nut_c2c $NUT_C2C --border $BORDER

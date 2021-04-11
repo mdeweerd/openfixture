@@ -1021,7 +1021,7 @@ module lasercut_v2 ()
     xoffset8 = xoffset7 + head_z + laser_pad;
     translate ([xoffset8, 0])
       head_side ();
-    xoffset9 = xoffset8 + head_z + laser_pad;
+    xoffset_after_head_sides = xoffset8 + head_z + laser_pad;
 
     // Add base supports
     y_base_offset = base_y + laser_pad;
@@ -1036,7 +1036,7 @@ module lasercut_v2 ()
       base_back_support ();
     x_base_offset_next = x_base_offset + base_x + laser_pad;
 
-    xoffset10 = x_base_offset_next;
+    xoffset10 = xoffset_after_head_sides;
     // Add front latch support
     translate ([xoffset10, 0])
       latch_support ();

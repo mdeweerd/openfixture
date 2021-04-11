@@ -17,7 +17,7 @@ if [ -r "${CONF_FILE}" ] ; then . "${CONF_FILE}" ; fi
 
 # PCB thickness
 PCB=${PCB:=1.6}
-LAYER=${PCB:=B.Cu}
+LAYER=${LAYER:=B.Cu}
 #REV=${REV:=rev.1.0}
 
 if [ 0 == 1 ] ; then
@@ -26,7 +26,6 @@ if [ 0 == 1 ] ; then
   EXCLUDE_SIZE_REFS=QR1,QR2,Q3,BRD1
   PCB_H=50
 fi
-
 
 # Nearest opposite side component to border
 BORDER=${BORDER:=0.8}

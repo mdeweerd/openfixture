@@ -30,14 +30,12 @@ DEFAULT_SCREW_LEN = 14
 
 if os.name == 'nt':
   PATHSEP = "\\"
-  CMDLINEQUOTE = "\""
+  CLI_QUOTE = "\""
   SCADVARQUOTE = "\"\""
 else:
   PATHSEP = "/"
-  CMDLINEQUOTE = "'"
+  CLI_QUOTE = "'"
   SCADVARQUOTE = "\""
-
-PATHQUOTE = "\""
 
 #if _platform == "cygwin":
 #elif _platform == "nt":
@@ -114,13 +112,13 @@ class GenFixture:
     # Generate openscad CLI option for expression define
     def genExpDefine(self,key,fmt,value):
         self.scad_values[key]= fmt % value
-        return (" -D"+key+"="+CMDLINEQUOTE+fmt+CMDLINEQUOTE) % value
+        return (" -D"+key+"="+CLI_QUOTE+fmt+CLI_QUOTE) % value
 
     # Generate openscad CLI option for string define
     def genStrDefine(self,key,fmt,value):
         quotedvalue=value.replace('\\','\\\\')
         self.scad_values[key]=(('"'+fmt+'"')%quotedvalue)
-        return (" -D"+key+"="+CMDLINEQUOTE+SCADVARQUOTE+fmt+SCADVARQUOTE+CMDLINEQUOTE) % quotedvalue
+        return (" -D"+key+"="+CLI_QUOTE+SCADVARQUOTE+fmt+SCADVARQUOTE+CLI_QUOTE) % quotedvalue
 
     def SetOptional(self, rev=None, pogo_d=None, washer_th=None, nut_f2f=None, nut_c2c=None, nut_th=None,
                     pivot_d=None, pcb_h=None, border=None, render=False,
@@ -298,6 +296,7 @@ class GenFixture:
         svgout = path + PATHSEP + self.prj_name + "-fixture.svg"
         svg2out = path + PATHSEP + self.prj_name + "-v2-fixture.svg"
         pngout = path + PATHSEP + self.prj_name + "-fixture.png"
+        stlout = path + PATHSEP + self.prj_name + "-fixture.stl"
         testout = path + PATHSEP + self.prj_name + "-test.dxf"
         validateout = path + PATHSEP + self.prj_name + "-validate.dxf"
         standalonescad = path + PATHSEP + self.prj_name + ".scad"
@@ -322,33 +321,33 @@ class GenFixture:
 
         # Create test part
         modeOpt=self.genStrDefine("mode","%s","testcut")
-        cmdTestcut=("openscad %s "+modeOpt+" -o %s openfixture.scad") % (args, PATHQUOTE + testout + PATHQUOTE)
+        cmdTestcut=("openscad %s "+modeOpt+" -o %s openfixture.scad") % (args, CLI_QUOTE + testout + CLI_QUOTE)
         #print(cmdTestcut)
         os.system(cmdTestcut)
 
         # Create testpoint validation
         modeOpt=self.genStrDefine("mode","%s","validate")
-        cmdValidate=("openscad %s "+modeOpt+" -o %s openfixture.scad") % (args, PATHQUOTE + validateout + PATHQUOTE)
+        cmdValidate=("openscad %s "+modeOpt+" -o %s openfixture.scad") % (args, CLI_QUOTE + validateout + CLI_QUOTE)
         print(cmdValidate)
         os.system(cmdValidate)
 
         # Create laser cuttable fixture (before rendering, because this is faster)
         modeOpt=self.genStrDefine("mode","%s","lasercut")
-        cmdLasercut=("openscad %s "+modeOpt+" -o %s -o %s openfixture.scad ") % (args, PATHQUOTE+dxfout+PATHQUOTE, PATHQUOTE+svgout+PATHQUOTE)
+        cmdLasercut=("openscad %s "+modeOpt+" -o %s -o %s openfixture.scad ") % (args, CLI_QUOTE+dxfout+CLI_QUOTE, CLI_QUOTE+svgout+CLI_QUOTE)
         #print(cmdLasercut)
         os.system(cmdLasercut)
 
         # Create laser v2 cuttable fixture (before rendering, because this is faster)
         modeOpt=self.genStrDefine("mode","%s","lasercut_v2")
-        cmdLasercut=("openscad %s "+modeOpt+" -o %s -o %s openfixture.scad ") % (args, PATHQUOTE+dxf2out+PATHQUOTE, PATHQUOTE+svg2out+PATHQUOTE)
+        cmdLasercut=("openscad %s "+modeOpt+" -o %s -o %s openfixture.scad ") % (args, CLI_QUOTE+dxf2out+CLI_QUOTE, CLI_QUOTE+svg2out+CLI_QUOTE)
         #print(cmdLasercut)
         os.system(cmdLasercut)
 
         # Create rendering
         if self.render:
             modeOpt=self.genStrDefine("mode","%s","3dmodel")
-            #cmdRender="openscad %s "+modeOpt+" --render -o %s openfixture.scad" % (args, pngout)
-            cmdRender=("openscad %s "+modeOpt+" --render --imgsize=800,800 -o %s openfixture.scad") % (args,CMDLINEQUOTE+pngout+CMDLINEQUOTE)
+            #cmdRender="openscad %s "+modeOpt+" --render -o %s -o openfixture.scad" % (args, pngout)
+            cmdRender=("openscad %s "+modeOpt+" --render --imgsize=800,800 -o %s -o %s openfixture.scad") % (args, CLI_QUOTE+pngout+CLI_QUOTE, CLI_QUOTE+stlout+CLI_QUOTE)
             #print(cmdRender)
             os.system(cmdRender)
 
@@ -371,10 +370,9 @@ class GenFixture:
 
                 # Check that there is no paste and it's on selected copper layer
                 if (p.IsOnLayer(self.layer) == True):
-
                     parent=p.GetParent() # Footprint
 
-                    # print ("%s-%s" % (parent.GetReference(), p.GetName()))
+                    # print ("%s-%s-%s" % (parent.GetReference(), p.GetName(), parent.GetValue()))
 
                     # Are we forcing this pad?
                     if (p.IsOnLayer(self.force_layer) == True):

@@ -345,7 +345,7 @@ class GenFixture:
 
                     parent=p.GetParent() # Footprint
 
-                    print ("%s-%s" % (parent.GetReference(), p.GetName()))
+                    # print ("%s-%s" % (parent.GetReference(), p.GetName()))
 
                     # Are we forcing this pad?
                     if (p.IsOnLayer(self.force_layer) == True):
@@ -403,7 +403,12 @@ class GenFixture:
 
             # Check that it's in the outline layer
             if line.GetLayerName() == 'Edge.Cuts':
-
+                p = line.GetParent()
+                try:
+                   print("LineParent: %s\n" % p.GetName())
+                except Exception:
+                   # Nothing
+                   print(".")
                 # Get bounding box
                 bb = line.GetBoundingBox()
 

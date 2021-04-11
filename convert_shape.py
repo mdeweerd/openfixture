@@ -19,7 +19,7 @@ for p in paths:
 
 import sys
 if FREECADPATH!=None:
-  print(FREECADPATH)
+  #print(FREECADPATH)
   sys.path.insert(0,FREECADPATH)
   os.environ["PYTHON_PATH"]=FREECADPATH;
 

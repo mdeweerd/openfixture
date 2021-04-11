@@ -9,33 +9,42 @@ KICAD_PYTHON=${KICAD_PYTHON:=python}
 BOARD="$1"
 BOARD_AND_CLI_OPTION="$*"
 OUTPUT=$(basename ${BOARD%.*})
+PROJECT_DIR=$(dirname "$OUTPUT")
+CONF_FILE=$(dirname "$BOARD")/fixture.conf
+
+# Include project's settings
+if [ -r "${CONF_FILE}" ] ; then . "${CONF_FILE}" ; fi
 
 # PCB thickness
-PCB=1.6
-LAYER='B.Cu'
-REV='rev.1.0'
+PCB=${PCB:=1.6}
+LAYER=${PCB:=B.Cu}
+#REV=${REV:=rev.1.0}
 
-PINS=${PINS:=J2-1,J2-2,T1-10,T1-6,P1-1,J3-1,J3-2,J1-1,J1-2,J7-1,J7-2,J7-3,J7-4,J7-5,J7-6,J7-7,J7-8,J9-1,J9-2,J9-3,J9-4,J9-5,J9-6,J9-7,J9-8,J11-1,J11-2,J11-3,J11-4,J11-5,J11-6,J14-1,J14-2,J14-3,J18-1,J18-2,J18-3,J18-4,J18-5,J18-6,J18-7,J18-8,J18-9,J18-10,J18-11,J18-12,J4-1,J4-2,U8-1,U8-2,U8-3,U8-4,U8-5,U8-6,U8-7,U8-8,U10-1,U10-2,U10-3,U10-4,U10-5,U10-6,U10-7,U10-8}
-EXCLUDE_SIZE_REFS=QR1,QR2,Q3,BRD1
+if [ 0 == 1 ] ; then
+  # Skipping those, example only
+  PINS=${PINS:=J2-1,J2-2,T1-10,T1-6,P1-1,J3-1,J3-2,J1-1,J1-2,J7-1,J7-2,J7-3,J7-4,J7-5,J7-6,J7-7,J7-8,J9-1,J9-2,J9-3,J9-4,J9-5,J9-6,J9-7,J9-8,J11-1,J11-2,J11-3,J11-4,J11-5,J11-6,J14-1,J14-2,J14-3,J18-1,J18-2,J18-3,J18-4,J18-5,J18-6,J18-7,J18-8,J18-9,J18-10,J18-11,J18-12,J4-1,J4-2,U8-1,U8-2,U8-3,U8-4,U8-5,U8-6,U8-7,U8-8,U10-1,U10-2,U10-3,U10-4,U10-5,U10-6,U10-7,U10-8}
+  EXCLUDE_SIZE_REFS=QR1,QR2,Q3,BRD1
+fi
 
 
 # Nearest opposite side component to border
-BORDER=0.8
+BORDER=${BORDER:=0.8}
 
-EXTRAOPT=""
+DEFAULTEXTRAOPT=""
 # POGO DIAMETER
-EXTRAOPT="${EXTRAOPT} --pogo_d=1.5"
+DEFAULTEXTRAOPT="${DEFAULTEXTRAOPT} --pogo_d=1.5"
 # Max component height
-EXTRAOPT="${EXTRAOPT} --pcb_h=50"
+DEFAULTEXTRAOPT="${DEFAULTEXTRAOPT} --pcb_h=50"
+EXTRAOPT=${EXTRAOPT:=$DEFAULTEXTRAOPT}
 
 # Material dimensions
-MAT=3.0
-SCREW_LEN=16.0
-SCREW_D=3.0
-WASHER_TH=1.0
-NUT_TH=3.85
-NUT_F2F=5.45
-NUT_C2C=6.10
+MAT=${MAT:=3.0}
+SCREW_LEN=${SCREW_LEN:=16.0}
+SCREW_D=${SCREW_D:=3.0}
+WASHER_TH=${WASHER_TH:=1.0}
+NUT_TH=${NUT_TH:=3.85}
+NUT_F2F=${NUT_F2F:=5.45}
+NUT_C2C=${NUT_C2C:=6.10}
 
 NHAS_MAGICK=$(which magick >&/dev/null ; echo $?)
 NHAS_INKSCAPE=$(which inkscape >&/dev/null ; echo $?)
@@ -47,6 +56,9 @@ LOGO_SVG=logo.svg
 # Default targets
 LOGO_WIDTH=50
 LOGO_HEIGHT=20
+
+
+
 
 # convert logo
 LOGO_DXF=${LOGO_SVG%.*}.dxf
@@ -91,9 +103,12 @@ if [ -r $LOGO_SVG ] ; then
   LOGO_OPT="--logo ${LOGO_SVG} --logo-w $LOGO_WIDTH --logo-h $LOGO_HEIGHT"
 fi
 
-
+if [ "$REV" != "" ] ; then 
+  REVOPT="--rev $REV"
+fi
 
 #RENDER=--render
 
 # Call python wrapper - KiCAD's Python is just 'python'.
-${KICAD_PYTHON} GenFixture.py $LOGO_OPT $RENDER --layer $LAYER --pins=${PINS} --exclude-size=${EXCLUDE_SIZE_REFS} --rev $REV --mat_th $MAT --pcb_th $PCB --out $OUTPUT --screw_len $SCREW_LEN --screw_d $SCREW_D --washer_th $WASHER_TH --nut_th $NUT_TH --nut_f2f $NUT_F2F --nut_c2c $NUT_C2C --border $BORDER ${EXTRAOPT} --board ${BOARD_AND_CLI_OPTION}
+echo ${KICAD_PYTHON} GenFixture.py $LOGO_OPT $RENDER --layer $LAYER --pins=${PINS} --exclude-size=${EXCLUDE_SIZE_REFS} ${REVOPT} --mat_th $MAT --pcb_th $PCB --out $OUTPUT --screw_len $SCREW_LEN --screw_d $SCREW_D --washer_th $WASHER_TH --nut_th $NUT_TH --nut_f2f $NUT_F2F --nut_c2c $NUT_C2C --border $BORDER ${EXTRAOPT} --board ${BOARD_AND_CLI_OPTION}
+${KICAD_PYTHON} GenFixture.py $LOGO_OPT $RENDER --layer $LAYER --pins=${PINS} --exclude-size=${EXCLUDE_SIZE_REFS} ${REVOPT} --mat_th $MAT --pcb_th $PCB --out $OUTPUT --screw_len $SCREW_LEN --screw_d $SCREW_D --washer_th $WASHER_TH --nut_th $NUT_TH --nut_f2f $NUT_F2F --nut_c2c $NUT_C2C --border $BORDER ${EXTRAOPT} --board ${BOARD_AND_CLI_OPTION}

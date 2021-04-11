@@ -837,12 +837,6 @@ module 3d_latch () {
 }
 
 module 3d_model () {
-
-    // Add carrier panels
-    carrier (pcb_outline, pcb_x, pcb_y, pcb_support_border);
-    carrier (pcb_outline, pcb_x, pcb_y, -0.05);
-    
-
     // head_base, head_side (x2), head_top, head_front_back (x2), cable_retention
     translate ([0, 0, base_z + base_pivot_offset - pivot_support_r])
       translate ([0, head_y + pivot_support_r, pivot_support_r])
@@ -850,7 +844,7 @@ module 3d_model () {
           translate ([0, -head_y - pivot_support_r, -pivot_support_r])
            3d_head ();
 
-    // base_side (x2), base_front_support, base_support, base_back_support, spacer (x2)
+    // base_side (x2), base_front_support, base_support, base_back_support, spacer (x2), carrier (x2)
     3d_base ();
 
     // latch (x2), latch_support

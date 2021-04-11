@@ -54,8 +54,8 @@ HAS_LOGO_SIZE=0
 LOGO_SVG=logo.svg
 
 # Default targets
-LOGO_WIDTH=50
-LOGO_HEIGHT=20
+LOGO_WIDTH=${LOGO_WIDTH:=40}
+LOGO_HEIGHT=${LOGO_HEIGHT:=15}
 
 
 
@@ -90,16 +90,18 @@ if [ -r $LOGO_SVG ] ; then
   fi
 
   if [ $HAS_LOGO_SIZE == 1 ] ; then
-    RATIO_TARGET=$((LOGO_WIDTH / LOGO_HEIGHT))
-    RATIO_REAL=$((REAL_LOGO_WIDTH / REAL_LOGO_HEIGHT))
-    if [ $RATIO_REAL -gt $RATIO_TARGET ] ; then 
+    RATIO_TARGET=$((${LOGO_WIDTH}00 / LOGO_HEIGHT))
+    RATIO_REAL=$((${REAL_LOGO_WIDTH}00 / REAL_LOGO_HEIGHT))
+    # echo "$RATIO_REAL -> $RATIO_TARGET" 
+    if [ $RATIO_REAL -lt $RATIO_TARGET ] ; then 
       # Need to fit according to height
-      LOGO_WIDTH=$((RATIO_TARGET * LOGO_HEIGHT))
+      LOGO_WIDTH=$((RATIO_REAL * LOGO_HEIGHT))
+      LOGO_WIDTH=${LOGO_WIDTH:0:-2} # Truncate
     else
-      LOGO_HEIGHT=$((RATIO_TARGET * LOGO_HEIGHT))
+      LOGO_HEIGHT=$((${LOGO_WIDTH}00 / RATIO_REAL))
     fi
   fi
-  echo $LOGO_WIDTH x $LOGO_HEIGHT
+  echo "$REAL_LOGO_WIDTH x $REAL_LOGO_HEIGHT -> $LOGO_WIDTH x $LOGO_HEIGHT"
   LOGO_OPT="--logo ${LOGO_SVG} --logo-w $LOGO_WIDTH --logo-h $LOGO_HEIGHT"
 fi
 

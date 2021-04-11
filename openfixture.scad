@@ -446,7 +446,7 @@ module head_top ()
         
         // Add other logo
         if (logo != "") 
-          translate ([head_x / 2, 30])
+          translate ([head_x / 2, 9 + logo_h / 2])
             logo ();
         
         // Remove cable relief holes

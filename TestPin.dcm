@@ -1,0 +1,13 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP R100-3W
+D Pogo Test Pin / Test Probe
+K Pogo Test Pin, Test Pin, Test Probe
+$ENDCMP
+#
+$CMP TestPin
+D Pogo Test Pin / Test Probe
+K Pogo Test Pin, Test Pin, Test Probe
+$ENDCMP
+#
+#End Doc Library

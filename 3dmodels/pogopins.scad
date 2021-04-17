@@ -1,8 +1,17 @@
-pin_type="E2";
+/**
+ * Author: Mario DE WEERD - https://github.com/mdeweerd
+ *
+ * License: CC-BY-SA
+ *   See: by-sa-4.0.md or https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+ */
+// This script generates POGOPIN models.
+// Note: The result has not been compared with physical pins yet.
+
 pin_corps_d=1.36;
 pin_notch_off=7;
 pin_corps_len=25;
 
+pin_type="A2";
 //socket_type="1W";
 //socket_type="2W";
 //socket_type="4W";
@@ -49,17 +58,46 @@ module pin_head() {
 
   pin_top_offset=pin_center_barrel_offset+pin_center_barrel_len;
 
-  if(pin_type=="E2") {
-    pin_top_diam=1.5;
-    pin_top_h=2.0;
-    color("blue")
+  pin_top_diam=
+     (pin_type=="E2"||pin_type=="A2"||pin_type=="D2"||pin_type=="G2"||pin_type=="H2"||pin_type=="LM2"||pin_type=="Q2"||pin_type=="T2"||pin_type=="M3")
+     ?1.5
+    :(pin_type=="A3"||pin_type=="E3"||pin_type=="D3"||pin_type=="H3")
+     ?1.8
+     :(pin_type=="B1")
+     ?0.99
+     :(pin_type=="F1"||pin_type=="J1"||pin_type=="Q1"||pin_type=="G1")
+     ?1.0
+     :(pin_type=="H4")
+     ?2.0
+     :(pin_type=="H5")
+     ?2.5
+     :(pin_type=="H6")
+     ?3.0
+     :-1; // Invalid
+  pin_top_h=
+     (pin_type=="M3")
+     ?7.0
+     :2.0;
+
+  if(pin_type=="E2"||pin_type=="E3") {
       translate([0,0,pin_top_offset])
         intersection() {
           cylinder(h=pin_top_h,d=pin_top_diam,$fa=1,$fs=0.01,$fn=100,center=false);
           // 90° cone
           cylinder(h=pin_top_h,d1=pin_top_h*2,d2=0,$fa=1,$fs=0.01,$fn=100,center=false);
         };
-  } else if(pin_type=="A2") {
+  } else if(pin_type=="A2"||pin_type=="A3") {
+echo(pin_top_diam);
+      translate([0,0,pin_top_offset])
+        difference() {
+          cylinder(h=pin_top_h,d=pin_top_diam,$fa=1,$fs=0.01,$fn=100,center=false);
+          translate([0,0,pin_top_h+pin_top_diam/2])
+            mirror([0,0,1])
+              cylinder(h=pin_top_h,d1=pin_top_h*2,d2=0,$fa=1,$fs=0.01,$fn=100,center=false);
+        };
+  } else if(pin_type=="G2"||pin_type=="G1") {
+      translate([0,0,pin_top_offset])
+        cylinder(h=pin_top_h,d=pin_top_diam,$fa=1,$fs=0.01,$fn=100,center=false);
   }
 }
 
@@ -129,7 +167,10 @@ module ring(D = 1, d = 10,$fn=100,center=true)
       circle(d=D);
 }
 
+union() {
   translate([0,0,cil_top_h+0.1])
     socket();
   translate([0,0,0.1+pin_notch_off-ring_mid_off])
     pin_head();
+}
+

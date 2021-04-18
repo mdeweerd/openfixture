@@ -1,7 +1,48 @@
 #!/bin/sh
+#
+# 3D Model STEP generation for POGO TEST PINS.
+#
+# Author: Mario DE WEERD - https://github.com/mdeweerd
+#
+# License: CC-BY-SA
+#   See: by-sa-4.0.md or https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+#
+# The 3D Models are a combination of the test pin socket
+# and the test pin.
+# SOCK contains the list of socket types
+# PINS contains the list of pint types
+# FAMILY is the name of the "family" of SOCKETs
+# PFAMILY is the name of the "family" of PINs
+#
+# This script loops over the combinations
+# and calls convert_shape.py, a gist by slazav on github .
+# That in turn requires Freecad to generate the step
+# file using the pogopin.scad "openscad" script that 
+# is copied to a temporary file to include the specific
+# parameters for the "openscad" script.
+# "FreeCAD" does not seem to offer the possibility to pass
+# "openscad" parameters ont he command line and does not
+# seemm to support the "include" statement in "opsnscad"
+# files.
+#
+# Openscad itself is not used because it generates 'stl' files
+# that KiCAD can't use.  
+#
+# This script also modifies properties of the generated STEP files 
+# such as Descriptions, authors and a reference to a license.
+#
+# Originaly this is run under cygwin on Windows, which explains
+# references to windows paths in some scripts.
+#
+# The `if [ 1 == 1 ]` and/or `if [ 0 == 1 ]` tests below
+# are there to quicly disable portions of this script during
+# development.
+#
 
 AUTHORS="Mario DE WEERD"
-if [ 0 == 1 ] ; then
+PERL=${PERL:=perl}
+CONVERT_SHAPE=${CONVERT_SHAPE:=../convert_shape.py}
+if [ 1 == 1 ] ; then
 SOCK=""
 SOCK="${SOCK} 1W"
 SOCK="${SOCK} 2W"
@@ -26,13 +67,13 @@ pin_type="$p";
 EOF
     SYMBOL=$FAMILY-$s-$PFAMILY-$p
     OUTFILE=$FAMILY-$s-$PFAMILY-$p.step
-    echo ../convert_shape.py tmp.scad $OUTFILE
-    ../convert_shape.py tmp.scad $OUTFILE
+    echo ${CONVERT_SHAPE} tmp.scad $OUTFILE
+    ${CONVERT_SHAPE} tmp.scad $OUTFILE
     DATE=$(TZ=UTC date +"%Y-%m-%dT%T")
     # Set correct names in generated files
-    perl -i -p -0777 -e "s/Open CASCADE[^']*|FreeCAD Model/${SYMBOL}/g;" \
+    ${PERL} -i -p -0777 -e "s/Open CASCADE[^']*|FreeCAD Model/${SYMBOL}/g;" \
           -e "s/FILE_NAME[^;]*;/FILE_NAME('Pogopin $FAMILY-$s socket with $PFAMILY-$p pin.',
-'$DATE',('$AUTHORS'),(''),(' '),'FreeCAD','CC-BY-CA');/g;" \
+'$DATE',('$AUTHORS'),(''),(' '),'FreeCAD','CC-BY-SA');/g;" \
          $OUTFILE
   done
 done
@@ -68,14 +109,14 @@ pin_type="$p";
 EOF
     SYMBOL=$FAMILY-$s-$PFAMILY-$p
     OUTFILE=$FAMILY-$s-$PFAMILY-$p.step
-    echo ../convert_shape.py tmp.scad $OUTFILE
-    ../convert_shape.py tmp.scad $OUTFILE
+    echo ${CONVERT_SHAPE} tmp.scad $OUTFILE
+    ${CONVERT_SHAPE} tmp.scad $OUTFILE
     DATE=$(TZ=UTC date +"%Y-%m-%dT%T")
     AUTHORS="Mario DE WEERD"
     # Set correct names in generated files
-    perl -i -p -0777 -e "s/Open CASCADE[^']*|FreeCAD Model/${SYMBOL}/g;" \
+    ${PERL} -i -p -0777 -e "s/Open CASCADE[^']*|FreeCAD Model/${SYMBOL}/g;" \
           -e "s/FILE_NAME[^;]*;/FILE_NAME('Pogopin $FAMILY-$s socket with $PFAMILY-$p pin.',
-'$DATE',('$AUTHORS'),(''),(' '),'FreeCAD','CC-BY-CA');/g;" \
+'$DATE',('$AUTHORS'),(''),(' '),'FreeCAD','CC-BY-SA');/g;" \
          $OUTFILE
   done
 done

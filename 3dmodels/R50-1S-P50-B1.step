@@ -2,7 +2,7 @@ ISO-10303-21;
 HEADER;
 FILE_DESCRIPTION(('R50-1S-P50-B1'),'2;1');
 FILE_NAME('Pogopin R50-1S socket with P50-B1 pin.',
-'2021-04-17T23:38:44',('Mario DE WEERD'),(''),(' '),'FreeCAD','CC-BY-CA');
+'2021-04-18T08:55:59',('Mario DE WEERD'),(''),(' '),'FreeCAD','CC-BY-SA');
 FILE_SCHEMA(('AUTOMOTIVE_DESIGN_CC2 { 1 2 10303 214 -1 1 5 4 }'));
 ENDSEC;
 DATA;

@@ -89,3 +89,6 @@ Creative Commons (CC BY-SA 4.0)
 
 Please email with any pull requests or new feature requests
 elliot@tinylabs.io
+
+## Resources
+KiCAD PCB generation script initiated from https://github.com/jaseg/pogojig.git

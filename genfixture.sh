@@ -32,7 +32,10 @@ BORDER=${BORDER:=0.8}
 
 DEFAULTEXTRAOPT=""
 # POGO DIAMETER
-DEFAULTEXTRAOPT="${DEFAULTEXTRAOPT} --pogo_d=1.5"
+# R100 - recommended drill = 1.7
+#DEFAULTEXTRAOPT="${DEFAULTEXTRAOPT} --pogo_d=1.7 --annular=0.25" 
+# R50 - recommended drill = 0.9
+DEFAULTEXTRAOPT="${DEFAULTEXTRAOPT} --pogo_d=0.9 --annular=0.25" 
 # Max component height
 DEFAULTEXTRAOPT="${DEFAULTEXTRAOPT} --pcb_h=50"
 EXTRAOPT=${EXTRAOPT:=$DEFAULTEXTRAOPT}
@@ -116,4 +119,4 @@ fi
 #RENDER=--render
 
 # Call python wrapper - KiCAD's Python is just 'python'.
-"${KICAD_PYTHON}" GenFixture.py $LOGO_OPT $RENDER --layer $LAYER --pins=${PINS} --exclude-size=${EXCLUDE_SIZE_REFS} ${REVOPT} ${PCBH_OPT} --mat_th $MAT --pcb_th $PCB --out $OUTPUT --screw_len $SCREW_LEN --screw_d $SCREW_D --washer_th $WASHER_TH --nut_th $NUT_TH --nut_f2f $NUT_F2F --nut_c2c $NUT_C2C --border $BORDER ${EXTRAOPT} --board ${BOARD_AND_CLI_OPTION}
+"${KICAD_PYTHON}" GenFixture.py $LOGO_OPT $RENDER --layer $LAYER --pins=${PINS} --exclude-size=${EXCLUDE_SIZE_REFS} ${REVOPT} ${PCBH_OPT} --mat_th $MAT --pcb_th $PCB --out $OUTPUT --screw_len $SCREW_LEN --screw_d $SCREW_D --washer_th $WASHER_TH --nut_th $NUT_TH --nut_f2f $NUT_F2F --nut_c2c $NUT_C2C --border $BORDER ${EXTRAOPT} --board ${BOARD_AND_CLI_OPTION} --kicad

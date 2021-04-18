@@ -22,6 +22,8 @@ import sys
 import argparse
 from sys import platform as _platform
 from pcbnew import *
+import subprocess
+import re
 
 # Defaults
 DEFAULT_PCB_TH = 1.6
@@ -42,6 +44,8 @@ else:
 #else:
 
 print("OS:"+os.name+" Platform: "+_platform+" PATHSEP: "+PATHSEP+"\r\n")
+KICAD_PYTHON = sys.executable
+GENERATE_KICAD = os.path.dirname(os.path.realpath(__file__))+'/generate_kicad.py'
 
   
 # Generate fixture class
@@ -72,6 +76,8 @@ class GenFixture:
     rev = None
     pogo_d = None
     washer_th = None
+    kicad = False
+    annular = 0.25
     nut_f2f = None
     nut_c2c = None
     nut_th = None
@@ -86,6 +92,7 @@ class GenFixture:
     origin = [float("inf"), float("inf")]
     dims = [0, 0]
     test_points = []
+    test_points_mirror = []
 
     def __init__(self, prj_name, brd, mat_th):
         self.prj_name = prj_name
@@ -121,7 +128,8 @@ class GenFixture:
         return (" -D"+key+"="+CLI_QUOTE+SCADVARQUOTE+fmt+SCADVARQUOTE+CLI_QUOTE) % quotedvalue
 
     def SetOptional(self, rev=None, pogo_d=None, washer_th=None, nut_f2f=None, nut_c2c=None, nut_th=None,
-                    pivot_d=None, pcb_h=None, border=None, render=False,
+                    pivot_d=None, pcb_h=None, border=None, render=False, kicad=False,
+                    annular=None,
                     exclude_size_refs = (),
                     pins=(), logo=None, logosize=(50,50)):
         self.rev = rev
@@ -134,11 +142,14 @@ class GenFixture:
         self.pcb_h = pcb_h
         self.border = border
         self.render = render
+        self.kicad = kicad
         self.pins = pins
         self.exclude_size_refs = exclude_size_refs
         self.logo = logo
         self.logosize = logosize
         self.scad_values = {}
+        if annular is not None:
+            self.annular=annular
 
     def SetParams(self, pcb_th, screw_len, screw_d):
         if pcb_th is not None:
@@ -251,13 +262,14 @@ class GenFixture:
                 self.rev = "rev.0"
 
         # Call openscad to generate fixture
-        args =  self.genExpDefine("test_points","%s",self.GetTestPointStr())
+        args =  self.genExpDefine("test_points","%s",self.GetScadTestPointStr())
         args += self.genNumDefine("tp_min_y","%.02f",self.min_y)
         args += self.genNumDefine("mat_th","%.02f",self.mat_th)
         args += self.genNumDefine("pcb_th","%.02f",self.pcb_th)
         args += self.genNumDefine("pcb_x","%.02f",self.dims[0])
         args += self.genNumDefine("pcb_y","%.02f",self.dims[1])
-        args += self.genStrDefine("pcb_outline","%s",(path + PATHSEP + self.prj_name + "-outline.dxf" ))
+        outline_dxf=path + PATHSEP + self.prj_name + "-outline.dxf" 
+        args += self.genStrDefine("pcb_outline","%s",outline_dxf)
         args += self.genNumDefine("screw_thr_len","%.02f",self.screw_len)
         args += self.genNumDefine("screw_d","%.02f",self.screw_d)
         args += self.genNumDefine("logo_w","%s",self.logosize[0])
@@ -269,7 +281,10 @@ class GenFixture:
         if self.logo != None:
             args += self.genStrDefine("logo","%s",self.logo)
         if self.pogo_d != None:
-            args += self.genNumDefine("pogo_r","%.02f",float(self.pogo_d/2))
+            pogo_d=float(self.pogo_d)
+            args += self.genNumDefine("pogo_r","%.02f",float(pogo_d/2))
+        else:
+            pogo_d=1.22
         if self.washer_th != None:
             args += self.genNumDefine("washer_th","%.02f",float(self.washer_th))
         if self.nut_f2f != None:
@@ -300,6 +315,7 @@ class GenFixture:
         testout = path + PATHSEP + self.prj_name + "-test.dxf"
         validateout = path + PATHSEP + self.prj_name + "-validate.dxf"
         standalonescad = path + PATHSEP + self.prj_name + ".scad"
+        kicadoutpathout = path
         #standalonescad = self.prj_name + ".scad"  # In local directory to propery reference logos
 
         # This will take a while, print something
@@ -328,7 +344,7 @@ class GenFixture:
         # Create testpoint validation
         modeOpt=self.genStrDefine("mode","%s","validate")
         cmdValidate=("openscad %s "+modeOpt+" -o %s openfixture.scad") % (args, CLI_QUOTE + validateout + CLI_QUOTE)
-        print(cmdValidate)
+        #print(cmdValidate)
         os.system(cmdValidate)
 
         # Create laser cuttable fixture (before rendering, because this is faster)
@@ -344,6 +360,33 @@ class GenFixture:
         os.system(cmdLasercut)
 
         # Create rendering
+        if self.kicad:
+            kicad_tp=self.GetKicadGenTestPointStr(self.test_points_mirror)
+            cmdKiCad="{python} {genexe} --testpins {testpins} --diameter {diam} --annular {annular} --name {prjname} {outline_dxf} {outpath}".format(
+                  #python=CLI_QUOTE+KICAD_PYTHON+CLI_QUOTE,
+                  python="'"+KICAD_PYTHON+"'",
+                  genexe=CLI_QUOTE+GENERATE_KICAD+CLI_QUOTE,
+                  testpins=kicad_tp,
+                  prjname=prj_name,
+                  diam=pogo_d,
+                  annular=str(self.annular),
+                  outline_dxf=CLI_QUOTE+outline_dxf+CLI_QUOTE,
+                  outpath=CLI_QUOTE+kicadoutpathout+CLI_QUOTE
+               )
+            #print(cmdKiCad)
+            #os.system(cmdKiCad)
+            subprocess.call([
+                  KICAD_PYTHON,
+                  GENERATE_KICAD,
+                  '--testpins',kicad_tp,
+                  '--diameter',str(pogo_d),
+                  '--annular',str(self.annular),
+                  '--name',prj_name+"-Test",
+                  outline_dxf,
+                  kicadoutpathout,
+                ])
+
+        # Create rendering
         if self.render:
             modeOpt=self.genStrDefine("mode","%s","3dmodel")
             #cmdRender="openscad %s "+modeOpt+" --render -o %s -o openfixture.scad" % (args, pngout)
@@ -354,11 +397,25 @@ class GenFixture:
         # Print output
         print("Fixture generated: '%s'" % dxfout)
 
-    def GetTestPointStr(self):
+    def GetScadTestPointStr(self):
         tps = "["
         for tp in self.test_points:
-            tps += "[%.02f,%.02f]," % (tp[0], tp[1])
+            tps += "[%.02f,%.02f]," % (tp.get('x'), tp.get('y'))
         return (tps + "]")
+
+    def GetKicadGenTestPointStr(self,test_points):
+        tps = ""
+        sep = ""
+        for tp in test_points:
+            tps += sep
+            tps += "{iden}:{x}:{y}:{net}".format(
+                 iden=tp.get('ref'),
+                 net=tp.get('net'),
+                 x=tp.get('x'),
+                 y=tp.get('y'),
+               )
+            sep=','
+        return tps
 
     def GetTestPoints(self):
 
@@ -401,13 +458,27 @@ class GenFixture:
                     tp = ToMM(p.GetPosition())
 
                     # Round x and y, invert x if mirrored
+                    xN = self.Round(tp[0] - self.origin[0])
+                    xM = self.dims[0] - (self.Round(tp[0] - self.origin[0]))
                     if self.mirror is False:
-                        x = self.Round(tp[0] - self.origin[0])
+                       x=xN
+                       x_mirror=xM
                     else:
-                        x = self.dims[0] - (self.Round(tp[0] - self.origin[0]))
+                       x=xM
+                       x_mirror=xN
                     y = self.Round(tp[1] - self.origin[1])
                     #print "tp = (%f, %f)" % (x,y)
                     # Debug - print information about pad.
+                    ref=parent.GetReference()
+                    name=p.GetName()
+                    if name != "1":
+                       ref+="-"+name
+                    net=p.GetNet().GetNetname()
+                    print(net)
+                    match=re.match(r'/(.*)',net)
+                    if match != None:
+                        net=match.group(1)
+
                     print("%s: %s\tTP(%0.2f,%0.2f)" % (parent.GetReference(), p.GetNet().GetNetname(), x, y))
 
                     # Check if less than min
@@ -415,7 +486,8 @@ class GenFixture:
                         self.min_y = y
 
                     # Save coordinates of pad
-                    self.test_points.append([x, y])
+                    self.test_points.append({'x':x,'y':y,'ref':ref,'net':net})
+                    self.test_points_mirror.append({'x':x_mirror,'y':y,'ref':ref,'net':net})
 
     def GetOriginDimensions(self):
         if (self.brd is None):
@@ -526,29 +598,31 @@ if __name__ == '__main__':
 
     # Add required arguments
     parser.add_argument('--board', help='<board_name.kicad_pcb>', required=True)
-    parser.add_argument('--mat_th', help='material thickness (mm)', required=True)
+    parser.add_argument('--mat_th', type=float, help='material thickness (mm)', required=True)
     parser.add_argument('--out', help='output directory', required=True)
 
     # Add optional arguments
-    parser.add_argument('--pcb_th', help='pcb thickness (mm)')
-    parser.add_argument('--pcb_h', help='pcb component height (mm)')
-    parser.add_argument('--screw_len', help='Assembly screw thread length (default = 16mm)')
-    parser.add_argument('--screw_d', help='Assembly screw diameter (default=3mm)')
+    parser.add_argument('--pcb_th', type=float, help='pcb thickness (mm)')
+    parser.add_argument('--pcb_h', type=float, help='pcb component height (mm)')
+    parser.add_argument('--screw_len', type=float, help='Assembly screw thread length (default = 16mm)')
+    parser.add_argument('--screw_d', type=float, help='Assembly screw diameter (default=3mm)')
     parser.add_argument('--layer', help='F.Cu | B.Cu')
     parser.add_argument('--flayer', help='Eco1.User | Eco2.User')
     parser.add_argument('--ilayer', help='Eco1.User | Eco2.User')
     parser.add_argument('--rev', help='Override revision')
-    parser.add_argument('--pogo_d', help='Pogo hole diameter (default=1.22mm)')
-    parser.add_argument('--washer_th', help='Washer thickness for hinge')
-    parser.add_argument('--nut_f2f', help='hex nut flat to flat (mm)')
-    parser.add_argument('--nut_c2c', help='hex nut corner to corner (mm)')
-    parser.add_argument('--nut_th', help='hex nut thickness (mm)')
-    parser.add_argument('--pivot_d', help='Pivot diameter (mm)')
-    parser.add_argument('--border', help='Board (ledge) under pcb (mm)')
+    parser.add_argument('--pogo_d', type=float, help='Pogo hole diameter (default=1.22mm)')
+    parser.add_argument('--washer_th', type=float, help='Washer thickness for hinge')
+    parser.add_argument('--nut_f2f', type=float, help='hex nut flat to flat (mm)')
+    parser.add_argument('--nut_c2c', type=float, help='hex nut corner to corner (mm)')
+    parser.add_argument('--nut_th', type=float, help='hex nut thickness (mm)')
+    parser.add_argument('--pivot_d', type=float, help='Pivot diameter (mm)')
+    parser.add_argument('--border', type=float, help='Board (ledge) under pcb (mm)')
     parser.add_argument('--render', help='Generate a 3d render of the final fixture', action='store_true')
+    parser.add_argument('--kicad', help='Generate a KiCad project', action='store_true')
+    parser.add_argument('--annular', type=float, help='Annular ring width for PADS on PCB', default=.25)
     parser.add_argument('--logo', help='Override logo')
-    parser.add_argument('--logo-w', help='Set logo width, mm', default=50)
-    parser.add_argument('--logo-h', help='Set logo height, mm', default=50)
+    parser.add_argument('--logo-w', type=float, help='Set logo width, mm', default=50)
+    parser.add_argument('--logo-h', type=float, help='Set logo height, mm', default=50)
     parser.add_argument('--pins', help='Extra pins to include (THT/SMD) REF-PINNBR - comma separated')
     parser.add_argument('--exclude-size', help='Module refs to exclude from board size - comma separated')
 
@@ -575,7 +649,7 @@ if __name__ == '__main__':
 
     # Check for pcb thickness
     if args.pcb_th is None:
-        args.pcb_th = "1.6"
+        args.pcb_th = 1.6
 
     if args.pins is not None:
         pins = args.pins.split(',')
@@ -603,9 +677,12 @@ if __name__ == '__main__':
                         nut_c2c=args.nut_c2c,
                         nut_th=args.nut_th,
                         pcb_h=args.pcb_h,
+                        pogo_d=args.pogo_d,
                         pivot_d=args.pivot_d,
                         border=args.border,
                         render=args.render, 
+                        kicad=args.kicad, 
+                        annular=args.annular, 
 			pins=pins,
 			exclude_size_refs=exclude_size_refs,
                         logo=args.logo, 

@@ -63,6 +63,15 @@ The resulting output is:
   * 2D DXF files that can be directly lasercut for assembly (several organisations)
   * A kicad project for a test board (optional)
 
+## Requirements
+
+- Setup your path to run KiCad's python (or a python with pcbnew).
+- You may need to install some modules.  
+  Either to your personal directory (example for ezdxf module, required for KiCad generation):  
+  `pip install --user ezdxf`  
+  Either globally:  
+  `pip install ezdxf`
+
 ## Recommended workflow for KiCad
   1. Clone this repo if you haven't already
   2. Setup a project specific bash script (use genfixture.sh as an example), and/or add a `fixture.conf` file to your project.

@@ -8,9 +8,9 @@
 KICAD_PYTHON=${KICAD_PYTHON:=python}
 BOARD="$1"
 BOARD_AND_CLI_OPTION="$*"
-OUTPUT=$(basename ${BOARD%.*})
+OUTPUT=$(basename "${BOARD%.*}")
 PROJECT_DIR=$(dirname "$OUTPUT")
-CONF_FILE=$(dirname "$BOARD")/fixture.conf
+CONF_FILE="$(dirname "$BOARD")/fixture.conf"
 
 # Include project's settings
 if [ -r "${CONF_FILE}" ] ; then . "${CONF_FILE}" ; fi
@@ -117,6 +117,7 @@ if [ "$PCB_H" != "" ] ; then
 fi
 
 #RENDER=--render
+#OUTPUT=demo_result
 
 # Call python wrapper - KiCAD's Python is just 'python'.
-"${KICAD_PYTHON}" GenFixture.py $LOGO_OPT $RENDER --layer $LAYER --pins=${PINS} --exclude-size=${EXCLUDE_SIZE_REFS} ${REVOPT} ${PCBH_OPT} --mat_th $MAT --pcb_th $PCB --out $OUTPUT --screw_len $SCREW_LEN --screw_d $SCREW_D --washer_th $WASHER_TH --nut_th $NUT_TH --nut_f2f $NUT_F2F --nut_c2c $NUT_C2C --border $BORDER ${EXTRAOPT} --board ${BOARD_AND_CLI_OPTION} --kicad
+"${KICAD_PYTHON}" GenFixture.py $LOGO_OPT $RENDER --layer $LAYER --pins=${PINS} --exclude-size=${EXCLUDE_SIZE_REFS} ${REVOPT} ${PCBH_OPT} --mat_th $MAT --pcb_th $PCB --out "$OUTPUT" --screw_len $SCREW_LEN --screw_d $SCREW_D --washer_th $WASHER_TH --nut_th $NUT_TH --nut_f2f $NUT_F2F --nut_c2c $NUT_C2C --border $BORDER ${EXTRAOPT} --board ${BOARD_AND_CLI_OPTION} --kicad

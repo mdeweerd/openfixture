@@ -7,15 +7,21 @@
 ## Goal
 The motivation of OpenFixture was to make a parametric fixturing system that could take fully generated inputs from kicad and produce a test fixture with minimal effort. The easiest way to use it is through the kicad python scripting interface.
 
-## Parameters
-For most projects (if using the standard BOM) the only parameters you'll need to set are mat_th and pcb_th. Something like the following should be sufficient:
-```
-./GenFixture.py --board [path to board.kicad_pcb] --mat_th [thickness in mm] --pcb_th [thickness in mm] --out board-fixture
+The project has been extended with Test PCB Schematic generation - you may want to generate only that without building the proposed fixture.
 
+## Parameters
+For most projects (if using the standard BOM) the only parameters you'll need to set are mat\_th and pcb\_th. Something like the following should be sufficient:
+```
 usage: GenFixture.py [-h] --board BOARD --mat_th MAT_TH --out OUT
-                     [--pcb_th PCB_TH] [--screw_len SCREW_LEN]
+                     [--pcb_th PCB_TH] [--pcb_h PCB_H] [--screw_len SCREW_LEN]
                      [--screw_d SCREW_D] [--layer LAYER] [--flayer FLAYER]
-                     [--ilayer ILAYER]
+                     [--ilayer ILAYER] [--rev REV] [--pogo_d POGO_D]
+                     [--washer_th WASHER_TH] [--nut_f2f NUT_F2F]
+                     [--nut_c2c NUT_C2C] [--nut_th NUT_TH] [--pivot_d PIVOT_D]
+                     [--border BORDER] [--render] [--kicad]
+                     [--annular ANNULAR] [--logo LOGO] [--logo-w LOGO_W]
+                     [--logo-h LOGO_H] [--pins PINS]
+                     [--exclude-size EXCLUDE_SIZE]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -23,42 +29,104 @@ optional arguments:
   --mat_th MAT_TH       material thickness (mm)
   --out OUT             output directory
   --pcb_th PCB_TH       pcb thickness (mm)
-  --screw_len SCREW_LEN  Assembly screw thread length (default = 14mm)
-  --screw_d SCREW_D     Assembly screw diameter (default=M3)
+  --pcb_h PCB_H         pcb component height (mm)
+  --screw_len SCREW_LEN
+                        Assembly screw thread length (default = 16mm)
+  --screw_d SCREW_D     Assembly screw diameter (default=3mm)
   --layer LAYER         F.Cu | B.Cu
   --flayer FLAYER       Eco1.User | Eco2.User
   --ilayer ILAYER       Eco1.User | Eco2.User
+  --rev REV             Override revision
+  --pogo_d POGO_D       Pogo hole diameter (default=1.22mm)
+  --washer_th WASHER_TH
+                        Washer thickness for hinge
+  --nut_f2f NUT_F2F     hex nut flat to flat (mm)
+  --nut_c2c NUT_C2C     hex nut corner to corner (mm)
+  --nut_th NUT_TH       hex nut thickness (mm)
+  --pivot_d PIVOT_D     Pivot diameter (mm)
+  --border BORDER       Board (ledge) under pcb (mm)
+  --render              Generate a 3d render of the final fixture
+  --kicad               Generate a KiCad project
+  --annular ANNULAR     Annular ring width for PADS on PCB
+  --logo LOGO           Override logo
+  --logo-w LOGO_W       Set logo width, mm
+  --logo-h LOGO_H       Set logo height, mm
+  --pins PINS           Extra pins to include (THT/SMD) REF-PINNBR - comma
+                        separated
+  --exclude-size EXCLUDE_SIZE
+                        Module refs to exclude from board size - comma
+                        separated
 ```					    
-The resulting output is:
-  * A 3D model of the test fixture for visualization
-  * A 2D DXF that can be directly lasercut for assembly
 
-## Recommended workflow for kicad
+The resulting output is:
+  * A 3D model of the test fixture for visualization (optional, with '--render')
+  * 2D DXF files that can be directly lasercut for assembly (several organisations)
+  * A kicad project for a test board (optional)
+
+## Recommended workflow for KiCad
   1. Clone this repo if you haven't already
-  2. Setup a project specific bash script (use genfixture.sh as an example)
+  2. Setup a project specific bash script (use genfixture.sh as an example), and/or add a `fixture.conf` file to your project.
   3. Enter board specific info, fixture hardware, material thickness, etc.
   4. Whenever the layout changes call ./genfixture.sh (from repo) and pass path to .kicad_pcb file.
   5. Fixture will be generated in $OUTPUT folder.
-  6. If anyone is interested in integrating this into kicad directly I'd be happy to support it and clean it up...
-  
+
+## Helper script
+
+`genfixture.sh` is a helper script that you can call with just the path to the PROJET.kicad\_pcb file.  You can add more options which will be appended to the call to `GenFixture.py`.
+
+On windows, that script can be used under cygwin.  The `cygwin.setpath` include script shows how you can set the system paths.
+
+`genfixture.sh` also checks the directory where the project file is located for a `fixture.conf` configuration file and includes the contents of that file as a bash include script.
+
+## Hints
+
+- Examine the `genfixture.sh` helper script to learn about option.
+- If you want smaller pogo pin holes for the test fixture than the PCB, perform multiple generations with different parameters.
+
+## KiCAD Test Schematic & Board Generation
+
+The `generate_kicad.py` script is called from `GenFixture.py` when the `--kicad` option is added.
+
+This generates a schematic sheet with the test pins connected to global netnames corresponding to the netnames on the original schematic.  It also generates a board that puts the test pins in the right locations.
+
+You can edit the board to change the EDGES to make a bigger board for instance.
+You can edit the schematic to add other connectors for test purposes or electronics for test purposes.
+
+The best method would be the use of hierarchical sheets so that the POGOPIN schematic can be regenerated.
+
 ## Hardware
-  * All that is needed is M3 (14mm+) screws, M3 hex nuts, and lasercut parts
-  * I use nylon bushings in the main pivot with m3 screws for a smoother joint but this is optional 
+  * All that is needed is 14xM3 (14mm+) screws, 14xM3 hex nuts, and lasercut parts
+  * Nylon bushings in the main pivot with m3 screws for a smoother joint can be used, but this is optional 
 
 ## Documentation
-http://tinylabs.io/openfixture
+https://tinylabs.io/openfixture
 
 ## BOM
-http://tinylabs.io/openfixture-bom
+Material needed to build the Fixture:
+https://tinylabs.io/openfixture-bom
 
-## KiCAD export
-http://tinylabs.io/openfixture-kicad-export
+- 15 M3 nuts 
+- 15 M3 hex nuts
+- Pogo sockets
+- Pogo pins
+- Glue
+
+Pogo pins come in different sizes, and are composed of a socket and a pin.
+There are R100 sockets, as well as R50 sockets and other sized.  The drill sizes change accordingly.
+You can find them from different sources.  You can find several source by looking for `R100-2S` or `R50-2W7` 
+
+- DirtyPCBs proposes R100-\* type sockets.  Make sure that you use the corresponding P100-\* pins
+  https://dirtypcbs.com/store/designer/details/ian/12/dirty-pogo-pins
+- Aliexpress, Alibaba, Amazon, CDiscount are marketplaces where you can find many other vendors.
+
 
 ## STEP export
 A standalone scad file is generated.  
 Copy the logos and font to the directory where the generated scad file is located.
 Or, copy the SCAD file to the script directory.
 You can perform `./convert_shape.py <SCADFILE> out.step` to convert to STEP for instance.
+
+There is a bug in FreeCad 0.19 that prevents generation (on Windows)
 
 ## STL export
 A standalone scad file is generated.  
@@ -70,7 +138,7 @@ You can perform `openscad --render -o out.stl <SCADFILE>` to convert to STL for 
 To verify that all your testpoints are within the PCB area, you can check that no checkpoint appears in the `*-validate.dxf` file.
 
 ## Assembly
-More info including detailed assembly instructions at http://tinylabs.io/openfixture-assembly
+More info including detailed assembly instructions at https://tinylabs.io/openfixture-assembly
 
 ## Dependencies
   * Newer version of openscad >= 2015.03-1
@@ -87,8 +155,24 @@ Creative Commons (CC BY-SA 4.0)
   * Elliot Buller - Tiny Labs Inc
   * Mario DE WEERD - Ynamics
 
-Please email with any pull requests or new feature requests
+(?) Please email with any pull requests or new feature requests
 elliot@tinylabs.io
 
 ## Resources
 KiCAD PCB generation script initiated from https://github.com/jaseg/pogojig.git
+
+## Work in progress / possible features
+
+- The generation of a hierchical sheet is work in progress
+- 3D models of test sockets and pins are generated.  They must be verified and could be integrated as KiCad components.
+- Mechanical holes should also be "exported" to the KiCad project to allow adding guides.
+- Add a filter to exclude specific pins.
+- KiCad integration (in a distant future)
+
+# Old stuff
+
+## KiCAD export
+https://tinylabs.io/openfixture-kicad-export
+
+Getting the test pins from the kicad schematic is integrated in this project.
+

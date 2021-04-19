@@ -43,7 +43,7 @@ else:
 #elif _platform == "nt":
 #else:
 
-print("OS:"+os.name+" Platform: "+_platform+" PATHSEP: "+PATHSEP+"\r\n")
+#print("OS:"+os.name+" Platform: "+_platform+" PATHSEP: "+PATHSEP+"\r\n")
 KICAD_PYTHON = sys.executable
 GENERATE_KICAD = os.path.dirname(os.path.realpath(__file__))+'/generate_kicad.py'
 

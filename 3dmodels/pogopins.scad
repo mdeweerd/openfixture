@@ -44,7 +44,7 @@ pin_corps_empty_diameter=pin_head_diameter+pin_head_margin;
 pin_center_barrel_offset=10;
 pin_center_barrel_ext_len=
           family=="R100"?6.35:
-          (family=="R50"?2.65
+          (family=="R50"?2.65 // 2.65=average? - 3.5 measured
           :-1);
 pin_center_barrel_len=pin_corps_len-pin_center_barrel_offset+pin_center_barrel_ext_len;
 
@@ -54,9 +54,10 @@ module pin_head() {
   difference() {
     cylinder(h=pin_corps_len,d=pin_corps_d,$fa=1,$fs=0.01,$fn=100);
     union() {
-      // Remove center of cilinder
+      // Remove center of cylinder
       translate([0,0,1]) // Bottom of 1mm
         cylinder(h=pin_corps_len,d=pin_corps_empty_diameter,$fa=1,$fs=0.01,$fn=100);
+      if(0) // No notch was observed on the P50 pin type, disabling this.
       // Create "notch" in cylinder
       translate([0,0,pin_corps_len-pin_notch_off])
         difference() {
@@ -158,7 +159,7 @@ color("red")
 
   ring_mid_off= // Ring offet from top
     (socket_type=="1W"||socket_type=="2W"||socket_type=="2S"||socket_type=="2W7"||socket_type=="1W7"||socket_type=="2C")
-       ?2.5
+       ?2 // Changed to 2 as observed on 2W7 measurement (was: 2.5)
     :(socket_type=="3T"||socket_type=="3C"||socket_type=="3S")?5
     :(socket_type=="4W"||socket_type=="4S"||socket_type=="4VW")
        ?7.5
@@ -174,7 +175,8 @@ color("red")
 module socket() {
   difference() {
     union() {
-color("red")
+//color("red")
+      // Top part of socket
       translate([0,0,-cil_top_h])
         cylinder(h=cil_top_h,d=cil_top_d,$fa=1,$fs=0.01,$fn=100);
       translate([0,0,-cil_top_h-cil_mid_h])
@@ -183,6 +185,7 @@ color("red")
           translate([0,0,cil_mid_h-mid_cone_h])
             cylinder(h=mid_cone_h,d1=0,d2=cil_top_d,$fa=1,$fs=0.01,$fn=100);
         }
+      // Bottom, depending on type
       if(square_bot) {
         translate([-cub_bot_side/2,-cub_bot_side/2,-cil_top_h-cil_mid_h-bot_h])
           cube([cub_bot_side,cub_bot_side,bot_h]);
@@ -198,8 +201,9 @@ color("red")
       translate([0,0,-ring_mid_off])
         ring(d=cil_top_d+0.5/2,D=0.5);
     };
-    translate([0,0,-cil_top_h+1])
-      cylinder(h=cil_top_h+1,d=pin_corps_d+0.02,$fa=1,$fs=0.01,$fn=100);
+    // Remove center of cilinder - allow pin to enter completely
+    translate([0,0,-pin_corps_len+0.001])
+      cylinder(h=pin_corps_len+pin_head_margin,d=pin_corps_d+0.02,$fa=1,$fs=0.01,$fn=100);
   }
 
 }
@@ -213,9 +217,13 @@ module ring(D = 1, d = 10,$fn=100,center=true)
 
 z_zero_offset=0.1;
 union() {
+  // Combine socket and pin.
   translate([0,0,cil_top_h+z_zero_offset])
     socket();
-  translate([0,0,z_zero_offset+cil_top_h-pin_corps_len+pin_notch_off-ring_mid_off])
+  // The notch offset was removed as it was no observed on the physical pin.
+  //translate([0,0,z_zero_offset+cil_top_h-pin_corps_len+pin_notch_off-ring_mid_off])
+  // The non-moving part of the pin enters entirely in the socket
+  translate([0,0,z_zero_offset+cil_top_h-pin_corps_len])
     pin_head();
 }
 

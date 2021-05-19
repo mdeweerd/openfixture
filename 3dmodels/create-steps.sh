@@ -42,7 +42,7 @@
 AUTHORS="Mario DE WEERD"
 PERL=${PERL:=perl}
 CONVERT_SHAPE=${CONVERT_SHAPE:=../convert_shape.py}
-if [ 1 == 1 ] ; then
+if [ 0 == 1 ] ; then
 SOCK=""
 SOCK="${SOCK} 1W"
 SOCK="${SOCK} 2W"
@@ -54,7 +54,6 @@ SOCK="${SOCK} 3T"
 SOCK="${SOCK} 4VW"
 
 PINS="E2 E3 A2 A3 G1 G2 B1"
-PINS="B1"
 FAMILY="R100"
 PFAMILY="P100"
 for s in $SOCK ; do
@@ -96,7 +95,11 @@ SOCK="${SOCK} 1S"
 SOCK="${SOCK} 2S"
 SOCK="${SOCK} 3S"
 
+# Generate only 2W7
+# SOCK="2W7"
+
 PINS="E2 E3 A2 A3 G1 G2 B1"
+#PINS="B1" # Generate only B1
 FAMILY="R50"
 PFAMILY="P50"
 for s in $SOCK ; do

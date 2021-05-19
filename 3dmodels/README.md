@@ -7,6 +7,14 @@ There are other 3D Models available on the Web that are not provided in this rep
 They can be downloaded from the following sources and are subject to their respective licences.
 - https://grabcad.com/library/pogo-pins-1
 
+# Actual Pogo-pins
+
+- After inserting the P50-J1 pin in the R50-2W7 socket, the total extended length is about 21mm.  The non moving part of the pin enters entirely in the socket.  The moving part of the pin extends about 3.5mm from the end and retracts fully when pushed.  
+  The R-50-2W7 is 13mm in length from the pin entry up to the retraction before the wire.  
+  The Wire entry up to the retraction is 4.5mm, the total length of the socket is 17.5mm
+  The extrusion on the R50-2W7 socket is 2.5mm from the edge
+  
+
 # TODO
 
 - Add more pin heads;

@@ -59,7 +59,7 @@ p.SetInt('useMaxFN',50)
 FreeCAD.loadFile(iname)
 
 # iterate through all objects
-for o in App.ActiveDocument.Objects:
+for o in App.ActiveDocument.RootObjects:
   # find root object and export the shape
   if len(o.InList)==0:
     if type=="step":   o.Shape.exportStep(oname)

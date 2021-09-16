@@ -78,7 +78,7 @@ render=1;
 
 
 
-// Smothness function for circles
+// Smoothness function for circles
 $fn = 15;
 
 // All measurements in mm

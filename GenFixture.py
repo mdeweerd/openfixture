@@ -129,6 +129,7 @@ class GenFixture:
 
     def SetOptional(self, rev=None, pogo_d=None, washer_th=None, nut_f2f=None, nut_c2c=None, nut_th=None,
                     pivot_d=None, pcb_h=None, border=None, render=False, kicad=False,
+                    pogo_uncompressed_length=None,
                     annular=None,
                     exclude_size_refs = (),
                     pins=(), logo=None, logosize=(50,50)):
@@ -143,6 +144,7 @@ class GenFixture:
         self.border = border
         self.render = render
         self.kicad = kicad
+        self.pogo_uncompressed_length=pogo_uncompressed_length
         self.pins = pins
         self.exclude_size_refs = exclude_size_refs
         self.logo = logo
@@ -186,7 +188,7 @@ class GenFixture:
             if item.__class__.__name__ == "PCB_TARGET":
                 item.DeleteStructure()
 
-    def PlotDXF(self, path):
+    def PlotDXF(self, path, LayerToCheck, plot_format=PLOT_FORMAT_DXF):
 
         # Save auxillary origin
         aux_origin_save = self.brd.GetAuxOrigin()
@@ -205,7 +207,7 @@ class GenFixture:
 
         # Set some important plot options:
         popt.SetDXFPlotUnits(DXF_PLOTTER.DXF_UNIT_MILLIMETERS)
-        popt.SetDXFPlotPolygonMode(False)
+        popt.SetDXFPlotPolygonMode(True) # Changed to True, was False in original code.
         popt.SetPlotFrameRef(False)
         popt.SetLineWidth(FromMM(0.1))
         popt.SetAutoScale(False)
@@ -224,13 +226,17 @@ class GenFixture:
         popt.SetColor(COLOR4D(0, 0, 0, 1.0))  # color4d = RED, GREEN, BLUE, OPACITY
 
         # Open file
-        pctl.SetLayer(Edge_Cuts)
-        pctl.OpenPlotfile("outline", PLOT_FORMAT_DXF, "Edges")
+        if LayerToCheck=="outline":
+            pctl.SetLayer(Edge_Cuts)
+            pctl.OpenPlotfile("outline", plot_format, "Edges")
+        elif LayerToCheck=="track":
+            pctl.SetLayer(self.layer)
+            pctl.OpenPlotfile("track", plot_format, "track")
 
         # Plot layer
         pctl.PlotLayer()
 
-        # CLose plot
+        # Close plot
         pctl.ClosePlot()
 
         # Restore origin
@@ -252,8 +258,14 @@ class GenFixture:
             print("or use the --flayer and/or --pins options to add test points")
             return
 
-        # Plot DXF
-        self.PlotDXF(path)
+        # Plot DXF Board outline
+        self.PlotDXF(path,"outline")
+        self.PlotDXF(path,"outline", PLOT_FORMAT_SVG)
+
+        # Plot DXF Board with track to check testpoints
+        self.PlotDXF(path,"track")
+        self.PlotDXF(path,"track", PLOT_FORMAT_SVG)
+
 
         # Get revision
         if self.rev is None:
@@ -274,6 +286,8 @@ class GenFixture:
         args += self.genNumDefine("screw_d","%.02f",self.screw_d)
         args += self.genNumDefine("logo_w","%s",self.logosize[0])
         args += self.genNumDefine("logo_h","%s",self.logosize[1])
+        track_dxf=path + PATHSEP + self.prj_name + "-track.dxf" 
+        args += self.genStrDefine("pcb_track","%s",track_dxf)
 
         # Set optional args
         if self.rev != None:
@@ -303,6 +317,8 @@ class GenFixture:
             args += self.genNumDefine("pcb_support_border","%.02f",float (self.border))
         if self.border != None:
             args += self.genNumDefine("border","%.02f",float(self.border))
+        if self.pogo_uncompressed_length != None:
+            args += self.genNumDefine("pogo_uncompressed_length","%.02f",float(self.pogo_uncompressed_length))
 
         # Create output file name
         dxfout = path + PATHSEP + self.prj_name + "-fixture.dxf"
@@ -319,7 +335,7 @@ class GenFixture:
         #standalonescad = self.prj_name + ".scad"  # In local directory to propery reference logos
 
         # This will take a while, print something
-        print("Generating Fixture...")
+        print("Generating Fixture...\n")
 
         # Create standalone SCAD file (For instance, to convert to step with FreeCAD) 
         vars="//\n// Parameters from command line\n//\n"
@@ -418,7 +434,7 @@ class GenFixture:
         return tps
 
     def GetTestPoints(self):
-
+        print("Test pin matrix :\n")
         # Iterate over all pads
         for m in self.brd.GetModules():
 
@@ -617,6 +633,7 @@ if __name__ == '__main__':
     parser.add_argument('--nut_th', type=float, help='hex nut thickness (mm)')
     parser.add_argument('--pivot_d', type=float, help='Pivot diameter (mm)')
     parser.add_argument('--border', type=float, help='Board (ledge) under pcb (mm)')
+    parser.add_argument('--pogo-uncompressed-length', type=float,help='Uncompressed length that pogo pin emerges from enclosure')
     parser.add_argument('--render', help='Generate a 3d render of the final fixture', action='store_true')
     parser.add_argument('--kicad', help='Generate a KiCad project', action='store_true')
     parser.add_argument('--annular', type=float, help='Annular ring width for PADS on PCB', default=.25)
@@ -680,11 +697,12 @@ if __name__ == '__main__':
                         pogo_d=args.pogo_d,
                         pivot_d=args.pivot_d,
                         border=args.border,
+                        pogo_uncompressed_length=args.pogo_uncompressed_length,
                         render=args.render, 
                         kicad=args.kicad, 
                         annular=args.annular, 
-			pins=pins,
-			exclude_size_refs=exclude_size_refs,
+			            pins=pins,
+			            exclude_size_refs=exclude_size_refs,
                         logo=args.logo, 
                         logosize=(args.logo_w, args.logo_h)
     )

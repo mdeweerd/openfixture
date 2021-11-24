@@ -6,6 +6,7 @@
  */
 // This script generates POGOPIN models.
 // Note: The result has not been compared with physical pins yet.
+gold="#ffd700";
 
 pin_type="B1";
 //socket_type="1W";
@@ -139,7 +140,7 @@ echo(pin_top_diam);
       translate([0,0,pin_top_offset])
         cylinder(h=pin_top_h,d=pin_top_diam,$fa=1,$fs=0.01,$fn=100,center=false);
   } else if(pin_type=="B1") {
-color("red")
+      //color("red")
       translate([0,0,pin_top_offset])
         cylinder(h=pin_top_diam*cos(45),d2=0,d1=pin_top_diam,$fa=1,$fs=0.01,$fn=100,center=false);
   }
@@ -216,6 +217,7 @@ module ring(D = 1, d = 10,$fn=100,center=true)
 }
 
 z_zero_offset=0.1;
+color(gold)
 union() {
   // Combine socket and pin.
   translate([0,0,cil_top_h+z_zero_offset])

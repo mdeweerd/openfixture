@@ -42,7 +42,7 @@
 AUTHORS="Mario DE WEERD"
 PERL=${PERL:=perl}
 CONVERT_SHAPE=${CONVERT_SHAPE:=../convert_shape.py}
-if [ 0 == 1 ] ; then
+if [ 1 == 1 ] ; then
 SOCK=""
 SOCK="${SOCK} 1W"
 SOCK="${SOCK} 2W"
@@ -72,7 +72,7 @@ EOF
     # Set correct names in generated files
     ${PERL} -i -p -0777 -e "s/Open CASCADE[^']*|FreeCAD Model/${SYMBOL}/g;" \
           -e "s/FILE_NAME[^;]*;/FILE_NAME('Pogopin $FAMILY-$s socket with $PFAMILY-$p pin.',
-'$DATE',('$AUTHORS'),(''),(' '),'FreeCAD','CC-BY-SA');/g;" \
+'$DATE',('$AUTHORS'),(''),' ','FreeCAD','CC-BY-SA');/g;" \
          $OUTFILE
   done
 done

@@ -5,4 +5,3 @@
 # is found.
 PATH='/cygdrive/c/Program Files/KiCad/bin':$PATH
 PATH='/cygdrive/c/Program Files/OpenSCAD':$PATH
-

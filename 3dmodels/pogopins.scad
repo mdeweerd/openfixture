@@ -158,7 +158,7 @@ echo(pin_top_diam);
 
   mid_cone_h=cil_mid_d*2;
 
-  ring_mid_off= // Ring offet from top
+  ring_mid_off= // Ring offset from top
     (socket_type=="1W"||socket_type=="2W"||socket_type=="2S"||socket_type=="2W7"||socket_type=="1W7"||socket_type=="2C")
        ?2 // Changed to 2 as observed on 2W7 measurement (was: 2.5)
     :(socket_type=="3T"||socket_type=="3C"||socket_type=="3S")?5
@@ -202,7 +202,7 @@ module socket() {
       translate([0,0,-ring_mid_off])
         ring(d=cil_top_d+0.5/2,D=0.5);
     };
-    // Remove center of cilinder - allow pin to enter completely
+    // Remove center of cylinder - allow pin to enter completely
     translate([0,0,-pin_corps_len+0.001])
       cylinder(h=pin_corps_len+pin_head_margin,d=pin_corps_d+0.02,$fa=1,$fs=0.01,$fn=100);
   }
@@ -212,7 +212,7 @@ module socket() {
 module ring(D = 1, d = 10,$fn=100,center=true)
 {
   rotate_extrude(angle=360)
-    translate([d/2 - D/2, 0]) 
+    translate([d/2 - D/2, 0])
       circle(d=D);
 }
 
@@ -228,4 +228,3 @@ union() {
   translate([0,0,z_zero_offset+cil_top_h-pin_corps_len])
     pin_head();
 }
-

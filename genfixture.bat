@@ -1,4 +1,4 @@
-REM @echo off 
+REM @echo off
 ECHO ON
 REM  Wrapper around python wrapper to generate fixture with my geometry
 REM Only argument is .kicad_board file

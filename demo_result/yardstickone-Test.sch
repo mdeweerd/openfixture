@@ -27,7 +27,7 @@ F 1 "pogopin" H 1050 1000 50  0000 L CNN
 F 2 "None" H 1000 1000 50  0001 C CNN
 F 3 "~" H 1000 1000 50  0001 C CNN
         1    1000 1000
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 1000 1300 1000
@@ -42,7 +42,7 @@ F 1 "pogopin" H 1050 1200 50  0000 L CNN
 F 2 "None" H 1000 1200 50  0001 C CNN
 F 3 "~" H 1000 1200 50  0001 C CNN
         1    1000 1200
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 1200 1300 1200
@@ -57,7 +57,7 @@ F 1 "pogopin" H 1050 1400 50  0000 L CNN
 F 2 "None" H 1000 1400 50  0001 C CNN
 F 3 "~" H 1000 1400 50  0001 C CNN
         1    1000 1400
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 1400 1300 1400
@@ -72,7 +72,7 @@ F 1 "pogopin" H 1050 1600 50  0000 L CNN
 F 2 "None" H 1000 1600 50  0001 C CNN
 F 3 "~" H 1000 1600 50  0001 C CNN
         1    1000 1600
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 1600 1300 1600
@@ -87,7 +87,7 @@ F 1 "pogopin" H 1050 1800 50  0000 L CNN
 F 2 "None" H 1000 1800 50  0001 C CNN
 F 3 "~" H 1000 1800 50  0001 C CNN
         1    1000 1800
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 1800 1300 1800
@@ -102,7 +102,7 @@ F 1 "pogopin" H 1050 2000 50  0000 L CNN
 F 2 "None" H 1000 2000 50  0001 C CNN
 F 3 "~" H 1000 2000 50  0001 C CNN
         1    1000 2000
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 2000 1300 2000
@@ -117,7 +117,7 @@ F 1 "pogopin" H 1050 2200 50  0000 L CNN
 F 2 "None" H 1000 2200 50  0001 C CNN
 F 3 "~" H 1000 2200 50  0001 C CNN
         1    1000 2200
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 2200 1300 2200
@@ -132,7 +132,7 @@ F 1 "pogopin" H 1050 2400 50  0000 L CNN
 F 2 "None" H 1000 2400 50  0001 C CNN
 F 3 "~" H 1000 2400 50  0001 C CNN
         1    1000 2400
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 2400 1300 2400
@@ -147,7 +147,7 @@ F 1 "pogopin" H 1050 2600 50  0000 L CNN
 F 2 "None" H 1000 2600 50  0001 C CNN
 F 3 "~" H 1000 2600 50  0001 C CNN
         1    1000 2600
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 2600 1300 2600
@@ -162,7 +162,7 @@ F 1 "pogopin" H 1050 2800 50  0000 L CNN
 F 2 "None" H 1000 2800 50  0001 C CNN
 F 3 "~" H 1000 2800 50  0001 C CNN
         1    1000 2800
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 2800 1300 2800
@@ -177,7 +177,7 @@ F 1 "pogopin" H 1050 3000 50  0000 L CNN
 F 2 "None" H 1000 3000 50  0001 C CNN
 F 3 "~" H 1000 3000 50  0001 C CNN
         1    1000 3000
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 3000 1300 3000
@@ -192,7 +192,7 @@ F 1 "pogopin" H 1050 3200 50  0000 L CNN
 F 2 "None" H 1000 3200 50  0001 C CNN
 F 3 "~" H 1000 3200 50  0001 C CNN
         1    1000 3200
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 3200 1300 3200
@@ -207,7 +207,7 @@ F 1 "pogopin" H 1050 3400 50  0000 L CNN
 F 2 "None" H 1000 3400 50  0001 C CNN
 F 3 "~" H 1000 3400 50  0001 C CNN
         1    1000 3400
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 3400 1300 3400
@@ -222,7 +222,7 @@ F 1 "pogopin" H 1050 3600 50  0000 L CNN
 F 2 "None" H 1000 3600 50  0001 C CNN
 F 3 "~" H 1000 3600 50  0001 C CNN
         1    1000 3600
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 3600 1300 3600
@@ -237,7 +237,7 @@ F 1 "pogopin" H 1050 3800 50  0000 L CNN
 F 2 "None" H 1000 3800 50  0001 C CNN
 F 3 "~" H 1000 3800 50  0001 C CNN
         1    1000 3800
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 3800 1300 3800
@@ -252,7 +252,7 @@ F 1 "pogopin" H 1050 4000 50  0000 L CNN
 F 2 "None" H 1000 4000 50  0001 C CNN
 F 3 "~" H 1000 4000 50  0001 C CNN
         1    1000 4000
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 4000 1300 4000
@@ -267,7 +267,7 @@ F 1 "pogopin" H 1050 4200 50  0000 L CNN
 F 2 "None" H 1000 4200 50  0001 C CNN
 F 3 "~" H 1000 4200 50  0001 C CNN
         1    1000 4200
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 4200 1300 4200
@@ -282,7 +282,7 @@ F 1 "pogopin" H 1050 4400 50  0000 L CNN
 F 2 "None" H 1000 4400 50  0001 C CNN
 F 3 "~" H 1000 4400 50  0001 C CNN
         1    1000 4400
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 4400 1300 4400
@@ -297,7 +297,7 @@ F 1 "pogopin" H 1050 4600 50  0000 L CNN
 F 2 "None" H 1000 4600 50  0001 C CNN
 F 3 "~" H 1000 4600 50  0001 C CNN
         1    1000 4600
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 4600 1300 4600
@@ -312,7 +312,7 @@ F 1 "pogopin" H 1050 4800 50  0000 L CNN
 F 2 "None" H 1000 4800 50  0001 C CNN
 F 3 "~" H 1000 4800 50  0001 C CNN
         1    1000 4800
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 4800 1300 4800
@@ -327,7 +327,7 @@ F 1 "pogopin" H 1050 5000 50  0000 L CNN
 F 2 "None" H 1000 5000 50  0001 C CNN
 F 3 "~" H 1000 5000 50  0001 C CNN
         1    1000 5000
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 5000 1300 5000
@@ -342,7 +342,7 @@ F 1 "pogopin" H 1050 5200 50  0000 L CNN
 F 2 "None" H 1000 5200 50  0001 C CNN
 F 3 "~" H 1000 5200 50  0001 C CNN
         1    1000 5200
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 5200 1300 5200
@@ -357,7 +357,7 @@ F 1 "pogopin" H 1050 5400 50  0000 L CNN
 F 2 "None" H 1000 5400 50  0001 C CNN
 F 3 "~" H 1000 5400 50  0001 C CNN
         1    1000 5400
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 5400 1300 5400
@@ -372,7 +372,7 @@ F 1 "pogopin" H 1050 5600 50  0000 L CNN
 F 2 "None" H 1000 5600 50  0001 C CNN
 F 3 "~" H 1000 5600 50  0001 C CNN
         1    1000 5600
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 5600 1300 5600
@@ -387,7 +387,7 @@ F 1 "pogopin" H 1050 5800 50  0000 L CNN
 F 2 "None" H 1000 5800 50  0001 C CNN
 F 3 "~" H 1000 5800 50  0001 C CNN
         1    1000 5800
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 5800 1300 5800
@@ -402,7 +402,7 @@ F 1 "pogopin" H 1050 6000 50  0000 L CNN
 F 2 "None" H 1000 6000 50  0001 C CNN
 F 3 "~" H 1000 6000 50  0001 C CNN
         1    1000 6000
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 6000 1300 6000
@@ -417,7 +417,7 @@ F 1 "pogopin" H 1050 6200 50  0000 L CNN
 F 2 "None" H 1000 6200 50  0001 C CNN
 F 3 "~" H 1000 6200 50  0001 C CNN
         1    1000 6200
-        -1   0    0    1   
+        -1   0    0    1
 $EndComp
 Wire Wire Line
         1200 6200 1300 6200

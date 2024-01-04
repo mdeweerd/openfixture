@@ -6,7 +6,7 @@ if NOT EXIST %PRJ_DIR%\yardstickone.kicad_pcb (
   REM REQUIRES CURL
   (
    SETLOCAL
-   cd %PRJ_DIR% 
+   cd %PRJ_DIR%
    curl -O https://raw.githubusercontent.com/greatscottgadgets/yardstick/master/yardstickone/yardstickone.kicad_pcb
    ENDLOCAL
   )
